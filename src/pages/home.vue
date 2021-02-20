@@ -1,9 +1,16 @@
 <template>
-  <div>111</div>
+  <div>
+    <CanvasEdit style="height: 100vh;"></CanvasEdit>
+  </div>
 </template>
 
 <script>
+import CanvasEdit from '@/components/topo/canvasEdit'
+
 export default {
+  components: {
+    CanvasEdit
+  }
 }
 </script>
 

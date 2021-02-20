@@ -237,11 +237,11 @@ const Basic = [
   {
     id: 'other',
     name: '其他组件',
-    showType: 'icon',
+    showType: 'icon-charts',
     children: [
       {
         name: '折线图',
-        icon: 'icon-rectangle',
+        icon: 'topo-icon-fsux_zhexiantu',
         id: 48,
         data: {
           text: '折线图',
@@ -273,7 +273,7 @@ const Basic = [
       },
       {
         name: '柱状图',
-        icon: 'icon-rectangle',
+        icon: 'topo-icon-fsux_tubiao_zhuzhuangtu',
         id: 49,
         data: {
           text: '柱状图',
@@ -328,7 +328,7 @@ const Basic = [
       },
       {
         name: '饼图',
-        icon: 'icon-rectangle',
+        icon: 'topo-icon-fsux_tubiao_bingtu1',
         id: 50,
         data: {
           text: '饼图',
@@ -395,7 +395,7 @@ const Basic = [
       },
       {
         name: '仪表盘',
-        icon: 'icon-rectangle',
+        icon: 'topo-icon-fsux_tubiao_yibiaopan',
         id: 51,
         data: {
           text: '仪表盘',

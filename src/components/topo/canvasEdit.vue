@@ -1,33 +1,44 @@
 <template>
-  <div id="canvas-page-container">
-    <!-- 连线菜单 -->
-    <Menu :line="menu_arr.lineName" :from="menu_arr.fromArrowType" :to="menu_arr.toArrowType" :topoForm.sync="topoForm" :canvas="canvas"
-          @on-change-menu="onChangeMenu" @save-canvas="onSaveCanvas" @back="backToList">
+  <div id="canvas-page-container" class="not-select">
+    <Menu :line="menu_arr.lineName"
+          :from="menu_arr.fromArrow"
+          :to="menu_arr.toArrow"
+          :canvas="canvas"
+          @on-change-menu="onChangeMenu"
+          @save-canvas="onSaveCanvas">
     </Menu>
+
     <div class="canvas-box">
-      <!-- 节点工具 -->
       <div class="tools">
-        <div v-for="(item, index) in tools" :key="index">
-          <div class="title">{{ item.name }}</div>
-          <div class="buttons">
-            <a v-for="(btn, i) in item.children" :key="i" :title="btn.name" :draggable="btn.data"
-               :class="[item.showType === 'image' ? 'image-box' : '']" @dragstart="onDrag($event, btn)">
-              <i v-if="item.showType === 'icon'" :class="`topology ${btn.icon}`"></i>
-              <template v-else-if="item.showType === 'image'">
-                <img :src="btn.image" alt="" />
-                <span class="tools-title">{{ btn.name }}</span>
-              </template>
-            </a>
-          </div>
-        </div>
+        <el-collapse v-model="activeTools">
+          <el-collapse-item v-for="(item, index) in tools" :key="index" :name="index">
+            <template slot="title">
+              <span class="collapse-title">{{item.name}}</span>
+            </template>
+            <div class="buttons">
+              <a v-for="(btn, i) in item.children" :key="i" :title="btn.name" :draggable="btn.data"
+                 :class="[item.showType === 'image' ? 'image-box' : '']" @dragstart="onDrag($event, btn)">
+                <i v-if="item.showType === 'icon'" :class="`topology ${btn.icon}`"></i>
+                <i v-else-if="item.showType === 'icon-charts'" :class="`topoIconfont ${btn.icon}`"></i>
+                <template v-else-if="item.showType === 'image'">
+                  <img :src="btn.image" alt="" />
+                  <span class="tools-title">{{ btn.name }}</span>
+                </template>
+              </a>
+            </div>
+          </el-collapse-item>
+        </el-collapse>
       </div>
-      <!-- 画布内容 -->
+
       <div class="canvas-container">
         <div ref="canvas" id="topology-canvas" class="full" @contextmenu="onContextMenu($event)"></div>
       </div>
-      <!-- 节点信息 -->
-      <div class="props" v-if="props.multi || props.node">
-        <Props :props.sync="props" :canvas="canvas" @change="onUpdateProps"></Props>
+
+      <div v-if="canvas !== null && (props.multi || props.node)">
+        <Props :props="props" :canvas="canvas" @change="onUpdateProps"></Props>
+      </div>
+      <div v-else-if="canvas !== null">
+        <Overall :canvas="canvas"></Overall>
       </div>
       <!-- 右击菜单 -->
       <div class="context-menu" v-if="contextmenu.left" :style="contextmenu">
@@ -44,6 +55,7 @@ import html2canvas from 'html2canvas'
 // 先导入库
 import { Topology } from '@topology/core'
 import Props from './canvasProps'
+import Overall from './canvasOverall'
 import Menu from './canvasMenu'
 import ContextMenu from './canvasContextMenu'
 import { register as registerChart } from '@topology/chart-diagram'
@@ -64,6 +76,7 @@ export default {
   name: 'canvasEdit',
   components: {
     Props,
+    Overall,
     Menu,
     ContextMenu
   },
@@ -74,8 +87,8 @@ export default {
       // 初始化菜单 连线 锚点 样式
       menu_arr: {
         lineName: 'curve',
-        fromArrowType: '',
-        toArrowType: 'triangleSolid'
+        fromArrow: '',
+        toArrow: 'triangleSolid'
       },
       topoForm: {
         // 组态图名称
@@ -102,11 +115,12 @@ export default {
       isLoading: false,
       // 当前拓扑id
       topoId: this.$route.params.topoId,
-      topoInfo: {}
+      topoInfo: {},
+      activeTools: [0, 1],
+      scale: 1
     }
   },
   created () {
-    console.log(this.$route)
     document.onclick = event => {
       this.contextmenu = {
         left: null,
@@ -129,15 +143,15 @@ export default {
       canvasOptions.on = this.onMessage
       this.canvas = new Topology('topology-canvas', canvasOptions)
       console.log(this.canvas)
-      this.open({pens: [], grid: true})
+      this.open({pens: [], grid: true, rule: true})
     },
     open (canvas) {
       this.canvas.open(canvas)
       // 初始化
       setTimeout(() => {
         this.canvas.data.lineName = this.menu_arr.lineName
-        this.canvas.data.fromArrowType = this.menu_arr.fromArrowType
-        this.canvas.data.toArrowType = this.menu_arr.toArrowType
+        this.canvas.data.fromArrow = this.menu_arr.fromArrow
+        this.canvas.data.toArrow = this.menu_arr.toArrow
         this.canvas.render()
       }, 0)
     },
@@ -170,7 +184,8 @@ export default {
           locked: false
         }
       }
-      console.log('event', event)
+      console.log('event', event, data)
+      console.log('canvas', this.canvas)
       if (!event.includes('move')) {
         this.contextmenu = {
           left: null,
@@ -271,9 +286,9 @@ export default {
     },
     onChangeMenu ({ key, value }) {
       this.$nextTick(() => {
+        console.log(key, value)
         this.canvas.data[key] = value
         this.menu_arr[key] = value
-        console.log(key, value)
         this.canvas.render()
       })
     },
@@ -291,30 +306,17 @@ export default {
         multi
       })
     },
-    onSaveCanvas (topoForm) {
-      if (!topoForm || !topoForm.topoName) {
-        this.$message({
-          type: 'error',
-          message: '组态名称不能为空!'
-        })
-        return
-      }
+    onSaveCanvas () {
       var vm = this
       html2canvas(this.$refs.canvas).then((canvas) => {
         vm.isLoading = true
         var postForm = {
-          name: topoForm.topoName,
-          description: topoForm.topoDesc,
+          name: '1',
+          description: '1',
           content: JSON.stringify(topology.data),
           pic: canvas.toDataURL()
         }
         console.log(postForm)
-      })
-    },
-
-    backToList: function () {
-      this.$router.push({
-        path: '/configuration/info'
       })
     },
 
@@ -370,96 +372,84 @@ export default {
 <style lang="scss" scoped>
   #canvas-page-container {
     position: relative;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
+    width: 100%;
+    height: 100%;
 
     .canvas-box {
-      height: calc(100vh - 41px);
-      flex-grow: 1;
       display: flex;
-    }
+      height: calc(100% - 41px);
+      position: relative;
 
-    .tools {
-      width: 200px;
-      height: calc(100vh - 41px);
-      /*padding: 5px;*/
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-      border-right: solid 1px #e6e6e6;
-      /*border-top: none;*/
-      overflow-y: auto;
+      .tools {
+        width: 200px;
+        border-right: 1px solid #C0C4CC;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        overflow-y: auto;
 
-      .title {
-        color: #606060;
-        font-weight: 600;
-        font-size: 12px;
-        line-height: 1;
-        padding: 5px 10px;
-        margin-top: 8px;
-        border-bottom: 1px solid #ddd;
+        /deep/ .el-collapse-item__header {
+          background: #fafafa;
 
-        &:first-child {
-          border-top: none;
-        }
-      }
-
-      .buttons {
-        padding: 10px 5px 0;
-
-        a {
-          display: inline-block;
-          color: #314659;
-          line-height: 1;
-          width: 55px;
-          height: 50px;
-          text-align: center;
-          text-decoration: none !important;
-          cursor: pointer;
-
-          .topology {
-            font-size: 32px;
-          }
-
-          &:hover {
-            color: #1890ff;
+          .collapse-title {
+            padding-left: 10px;
           }
         }
 
-        a.image-box {
-          width: 48px;
-          height: 40px;
-          margin: 5px 0 0 9px;
-        }
+        /deep/ .el-collapse-item__content {
+          padding-bottom: 0;
 
-        img {
-          width: 100%;
-          height: 100%;
-        }
+          .buttons {
+            padding: 5%;
 
-        .tools-title {
-          display: inline-block;
-          width: 100%;
-          font-size: 12px;
-          white-space: nowrap;
-          text-overflow: ellipsis;
-          overflow: hidden;
+            a {
+              display: inline-table;
+              color: #303133;
+              line-height: 1;
+              width: 33.3333%;
+              height: 50px;
+              text-align: center;
+              text-decoration: none !important;
+              cursor: pointer;
+
+              i {
+                display: table-cell;
+                vertical-align: middle;
+              }
+
+              .topology {
+                font-size: 32px;
+              }
+
+              .topoIconfont {
+                font-size: 32px;
+              }
+            }
+          }
         }
       }
     }
 
     .canvas-container {
-      width: calc(100vw - 201px - 241px);
-      height: calc(100vh - 41px);
+      position: absolute;
+      left: 220px;
+      right: 320px;
+      top: 20px;
+      bottom: 20px;
       overflow: auto;
+      display: flex;
+      justify-items: center;
+      align-items: center;
     }
+
     .full {
-      /*flex-grow: 1;*/
-      width: 100%;
-      height: 100%;
-      /*min-width: 960px !important;*/
-      /*width: auto !important;*/
-      /*min-height: 540px;*/
+      /*width: 100%;*/
+      /*height: 100%;*/
+      width: 1200px;
+      height: 675px;
+      border: 2px solid #fafafa;
+      margin: auto;
     }
 
     .context-menu {

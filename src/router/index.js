@@ -9,10 +9,6 @@ export default new Router({
       path: '/',
       name: 'Home',
       component: resolve => require(['@/pages/home'], resolve)
-    }, {
-      path: '/topo',
-      name: 'Topo',
-      component: resolve => require(['@/pages/topo/topo'], resolve)
     }
   ]
 })

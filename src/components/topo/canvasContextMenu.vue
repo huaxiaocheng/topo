@@ -5,8 +5,8 @@
       mode="horizontal"
       @select="handleMenuSelect"
       background-color="#fff"
-      text-color="#314659"
-      active-text-color="#1890ff">
+      text-color="#303133"
+      active-text-color="#409EFF">
       <template v-for="(item,index) in menuArr.filter(item => item.display)">
         <el-menu-item :index="item.index" :disabled="item.disabled" :key="item.index">{{ item.value }}</el-menu-item>
         <div class="line" v-if="item.line" :key="index"></div>
@@ -95,7 +95,7 @@ export default {
 
 <style lang="scss">
   .menus {
-    color: #314659;
+    color: #303133;
     background-color: #fff;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
     text-align: left;

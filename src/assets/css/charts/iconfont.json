@@ -1,0 +1,51 @@
+{
+  "id": "2375614",
+  "name": "topo",
+  "font_family": "topoIconfont",
+  "css_prefix_text": "topo-icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "5664082",
+      "name": "fsux_图表_仪表盘",
+      "font_class": "fsux_tubiao_yibiaopan",
+      "unicode": "e606",
+      "unicode_decimal": 58886
+    },
+    {
+      "icon_id": "5661737",
+      "name": "fsux_图表_环图",
+      "font_class": "fsux_tubiao_bingtu",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "5664079",
+      "name": "fsux_图表_饼图",
+      "font_class": "fsux_tubiao_bingtu1",
+      "unicode": "e601",
+      "unicode_decimal": 58881
+    },
+    {
+      "icon_id": "5664303",
+      "name": "fsux_图表_柱状图",
+      "font_class": "fsux_tubiao_zhuzhuangtu",
+      "unicode": "e602",
+      "unicode_decimal": 58882
+    },
+    {
+      "icon_id": "5664304",
+      "name": "fsux_图表_折线图",
+      "font_class": "fsux_zhexiantu",
+      "unicode": "e603",
+      "unicode_decimal": 58883
+    },
+    {
+      "icon_id": "11457847",
+      "name": "fsux_图表_百分比环图",
+      "font_class": "fsux_tubiao_baifenbihuantu",
+      "unicode": "e605",
+      "unicode_decimal": 58885
+    }
+  ]
+}
