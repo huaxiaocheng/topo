@@ -7,8 +7,11 @@
       background-color="#fff"
       text-color="#303133"
       active-text-color="#409EFF">
-      <template v-for="(item,index) in menuArr.filter(item => item.display)">
-        <el-menu-item :index="item.index" :disabled="item.disabled" :key="item.index">{{ item.value }}</el-menu-item>
+      <template v-for="(item,index) in menuArr">
+        <el-menu-item :index="item.index" :disabled="item.disabled" :key="item.index">
+          <span>{{ item.value }}</span>
+          <span>{{ item.keyPosition }}</span>
+        </el-menu-item>
         <div class="line" v-if="item.line" :key="index"></div>
       </template>
     </el-menu>
@@ -16,22 +19,6 @@
 </template>
 
 <script>
-const commonArr = [
-  {
-    index: 'Top',
-    value: '置顶',
-    disabled: false,
-    display: true,
-    line: false
-  },
-  {
-    index: 'Bottom',
-    value: '置底',
-    disabled: false,
-    display: true,
-    line: false
-  }
-]
 export default {
   data () {
     return {}
@@ -57,35 +44,168 @@ export default {
   },
   computed: {
     menuArr: function () {
-      // @返回优先级 多选 > 连线 > 单节点 > 空白
-      // 1. 多选返回 通用
-      // 2. 连线存在返回 删除  + 通用
-      // 3. 节点存在
-      let props = this.props
-      if (Object.values(props).every(item => !item)) {
-        return []
-      } else if (props.multi) { // 多选
-        return commonArr
-      } else if (props.line) { // 连线
+      if (Object.values(this.props).every(item => !item)) { // 空白处
         return [
           {
-            index: 'DelLine',
+            index: 'Undo',
+            value: '撤销',
+            disabled: false,
+            line: false,
+            keyPosition: 'Ctrl + Z'
+          },
+          {
+            index: 'Redo',
+            value: '重做',
+            disabled: false,
+            line: true,
+            keyPosition: 'Ctrl + Shift + Z'
+          },
+          {
+            index: 'Copy',
+            value: '复制',
+            disabled: true,
+            line: false,
+            keyPosition: 'Ctrl + C'
+          },
+          {
+            index: 'Paste',
+            value: '粘贴',
+            disabled: false,
+            line: false,
+            keyPosition: 'Ctrl + V'
+          }
+        ]
+      } else if (this.props.nodes && this.props.nodes.length) {
+        return [
+          {
+            index: 'Top',
+            value: '置顶',
+            disabled: false,
+            line: false,
+            keyPosition: null
+          },
+          {
+            index: 'Bottom',
+            value: '置底',
+            disabled: false,
+            line: false,
+            keyPosition: null
+          },
+          {
+            index: 'Up',
+            value: '上移一层',
+            disabled: true,
+            line: false,
+            keyPosition: null
+          },
+          {
+            index: 'Down',
+            value: '下移一层',
+            disabled: true,
+            line: true,
+            keyPosition: null
+          },
+          {
+            index: 'Delete',
             value: '删除',
             disabled: false,
-            display: true,
-            line: false
+            line: true,
+            keyPosition: 'Delete'
+          },
+          {
+            index: 'Undo',
+            value: '撤销',
+            disabled: false,
+            line: false,
+            keyPosition: 'Ctrl + Z'
+          },
+          {
+            index: 'Redo',
+            value: '重做',
+            disabled: false,
+            line: true,
+            keyPosition: 'Ctrl + Shift + Z'
+          },
+          {
+            index: 'Copy',
+            value: '复制',
+            disabled: false,
+            line: false,
+            keyPosition: 'Ctrl + C'
+          },
+          {
+            index: 'Paste',
+            value: '粘贴',
+            disabled: false,
+            line: false,
+            keyPosition: 'Ctrl + V'
           }
         ]
       } else {
         return [
           {
-            index: 'DelNode',
+            index: 'Top',
+            value: '置顶',
+            disabled: false,
+            line: false,
+            keyPosition: null
+          },
+          {
+            index: 'Bottom',
+            value: '置底',
+            disabled: false,
+            line: false,
+            keyPosition: null
+          },
+          {
+            index: 'Up',
+            value: '上移一层',
+            disabled: false,
+            line: false,
+            keyPosition: null
+          },
+          {
+            index: 'Down',
+            value: '下移一层',
+            disabled: false,
+            line: true,
+            keyPosition: null
+          },
+          {
+            index: 'Delete',
             value: '删除',
             disabled: false,
-            display: true,
-            line: true
+            line: true,
+            keyPosition: 'Delete'
           },
-          ...commonArr
+          {
+            index: 'Undo',
+            value: '撤销',
+            disabled: false,
+            line: false,
+            keyPosition: 'Ctrl + Z'
+          },
+          {
+            index: 'Redo',
+            value: '重做',
+            disabled: false,
+            line: true,
+            keyPosition: 'Ctrl + Shift + Z'
+          },
+          {
+            index: 'Copy',
+            value: '复制',
+            disabled: false,
+            line: false,
+            keyPosition: 'Ctrl + C'
+          },
+          {
+            index: 'Paste',
+            value: '粘贴',
+            disabled: false,
+            line: false,
+            keyPosition: 'Ctrl + V'
+          }
         ]
       }
     }
@@ -112,7 +232,7 @@ export default {
 
         &:hover,
         &:focus {
-          color: #1890ff !important;
+          color: #409EFF !important;
           background-color: transparent !important;
         }
       }
@@ -131,6 +251,12 @@ export default {
         padding: 0 20px;
         height: 26px;
         line-height: 26px;
+        display: flex;
+        justify-content: space-between;
+
+        span:last-child {
+          color: #909399;
+        }
       }
 
       .el-submenu__title {

@@ -1,5 +1,6 @@
 <template>
   <div id="canvas-page-container" class="not-select">
+    <!-- 顶部菜单 -->
     <Menu :line="menu_arr.lineName"
           :from="menu_arr.fromArrow"
           :to="menu_arr.toArrow"
@@ -7,7 +8,8 @@
           @on-change-menu="onChangeMenu"
           @save-canvas="onSaveCanvas">
     </Menu>
-
+    <!-- 顶部菜单 -->
+    <!-- 工具 -->
     <div class="canvas-box">
       <div class="tools">
         <el-collapse v-model="activeTools">
@@ -29,21 +31,25 @@
           </el-collapse-item>
         </el-collapse>
       </div>
-
+      <!-- 工具 -->
+      <!-- 画布 -->
       <div class="canvas-container">
         <div ref="canvas" id="topology-canvas" class="full" @contextmenu="onContextMenu($event)"></div>
       </div>
-
-      <div v-if="canvas !== null && (props.multi || props.node)">
+      <!-- 画布 -->
+      <!-- 属性 -->
+      <div v-if="canvas !== null && (props.node || props.line || props.nodes)">
         <Props :props="props" :canvas="canvas" @change="onUpdateProps"></Props>
       </div>
       <div v-else-if="canvas !== null">
         <Overall :canvas="canvas"></Overall>
       </div>
-      <!-- 右击菜单 -->
+      <!-- 属性 -->
+      <!-- 右键菜单 -->
       <div class="context-menu" v-if="contextmenu.left" :style="contextmenu">
         <ContextMenu :props="props" :canvas="canvas" @context="handleNode" />
       </div>
+      <!-- 右键菜单 -->
     </div>
   </div>
 </template>
@@ -51,8 +57,7 @@
 <script>
 // utils
 import Tools from '../../utils/tools'
-import html2canvas from 'html2canvas'
-// 先导入库
+// import html2canvas from 'html2canvas'
 import { Topology } from '@topology/core'
 import Props from './canvasProps'
 import Overall from './canvasOverall'
@@ -61,65 +66,55 @@ import ContextMenu from './canvasContextMenu'
 import { register as registerChart } from '@topology/chart-diagram'
 import * as echarts from 'echarts'
 registerChart(echarts)
-// 配置项
-const canvasOptions = {
-  font: {
-    color: '#314659',
-    fontSize: 12
-  },
-  color: '#314659',
-  keydown: -1,
-  disableEmptyLine: true
-}
 
 export default {
   name: 'canvasEdit',
   components: {
-    Props,
-    Overall,
+    // 顶部菜单
     Menu,
-    ContextMenu
+    // 右键菜单
+    ContextMenu,
+    // 节点属性
+    Props,
+    // 画布属性
+    Overall
   },
   data () {
     return {
-      tools: [],
-      // 初始化菜单 连线 锚点 样式
+      // ---------------------------------------------------------------------------------------------------------------
+      // 连线类型、起点箭头、终点箭头
       menu_arr: {
         lineName: 'curve',
         fromArrow: '',
         toArrow: 'triangleSolid'
       },
-      topoForm: {
-        // 组态图名称
-        topoName: '',
-        // 组态图描述
-        topoDesc: ''
-      },
-      // 当前节点props数据
-      props: {
-        node: null,
-        line: null,
-        nodes: null,
-        multi: false,
-        expand: false,
-        locked: false
-      },
+      // ---------------------------------------------------------------------------------------------------------------
+      // 工具
+      tools: [],
+      // 默认展开
+      activeTools: [0, 1],
+      // ---------------------------------------------------------------------------------------------------------------
+      // 画布
+      canvas: null,
+      // ---------------------------------------------------------------------------------------------------------------
+      // 右键菜单
       contextmenu: {
         left: null,
         top: null,
         bottom: null
       },
-      canvas: null,
-
-      isLoading: false,
-      // 当前拓扑id
-      topoId: this.$route.params.topoId,
-      topoInfo: {},
-      activeTools: [0, 1],
-      scale: 1
+      // ---------------------------------------------------------------------------------------------------------------
+      // 当前节点
+      props: {
+        node: null,
+        line: null,
+        nodes: null
+      }
+      // ---------------------------------------------------------------------------------------------------------------
     }
   },
   created () {
+    // 任意点击之后隐藏右键菜单
     document.onclick = event => {
       this.contextmenu = {
         left: null,
@@ -129,24 +124,44 @@ export default {
     }
   },
   mounted () {
-    console.log('编辑画布')
-    /**
-     *  @为画布初始化事件绑定
-     *
-     * */
     this.initCanvas()
     this.initBaseTools()
   },
   methods: {
+    // -----------------------------------------------------------------------------------------------------------------
+    // 修改连线类型、起点箭头、终点箭头
+    onChangeMenu ({ key, value }) {
+      this.$nextTick(() => {
+        this.canvas.data[key] = value
+        this.menu_arr[key] = value
+        this.canvas.render()
+      })
+    },
+    // 保存
+    onSaveCanvas () {
+      console.log(JSON.stringify(topology.data))
+    },
+    // -----------------------------------------------------------------------------------------------------------------
+    // 初始化工具
+    initBaseTools: function () {
+      this.tools = Tools([])
+    },
+    // 拖拽工具
+    onDrag (event, node) {
+      event.dataTransfer.setData('Topology', JSON.stringify(node.data))
+    },
+    // -----------------------------------------------------------------------------------------------------------------
+    // 初始化画布
     initCanvas () {
+      let canvasOptions = {}
       canvasOptions.on = this.onMessage
       this.canvas = new Topology('topology-canvas', canvasOptions)
-      console.log(this.canvas)
       this.open({pens: [], grid: true, rule: true})
     },
+    // 打开画布
     open (canvas) {
       this.canvas.open(canvas)
-      // 初始化
+      // 打开画布后初始化连线类型、起点箭头、终点箭头
       setTimeout(() => {
         this.canvas.data.lineName = this.menu_arr.lineName
         this.canvas.data.fromArrow = this.menu_arr.fromArrow
@@ -154,10 +169,10 @@ export default {
         this.canvas.render()
       }, 0)
     },
+    // 画布事件
     onContextMenu (event) {
       event.preventDefault()
       event.stopPropagation()
-      console.log('onContextMenu-props', this.props)
       if (event.clientY + 360 < document.body.clientHeight) {
         this.contextmenu = {
           left: event.clientX + 'px',
@@ -170,21 +185,18 @@ export default {
         }
       }
     },
-    onDrag (event, node) {
-      event.dataTransfer.setData('Topology', JSON.stringify(node.data))
-    },
+    // 画布监听
     onMessage (event, data) {
       if (this.props.node && this.props.node.id !== data.id && ['node', 'addNode'].indexOf(event) > -1) {
         this.props = {
           node: null,
           line: null,
-          multi: false,
-          nodes: null,
-          locked: false
+          nodes: null
         }
       }
       console.log('event', event, data)
-      console.log('canvas', this.canvas)
+
+      // 除moveInNode和moveOutNode，其他操作时隐藏右键菜单
       if (!event.includes('move')) {
         this.contextmenu = {
           left: null,
@@ -204,165 +216,165 @@ export default {
             this.props = {
               node: data,
               line: null,
-              multi: false,
-              expand: false,
-              nodes: null,
-              locked: data.locked,
-              propShow: data.data // data.data ? true : false
+              nodes: null
             }
-            console.log(data)
             break
           case 'moveInNode':
             break
           case 'addNode':
-            console.log('onMessage', data)
             this.props = {
               node: data,
               line: null,
-              multi: false,
-              expand: this.props.expand,
-              nodes: null,
-              locked: data.locked
+              nodes: null
             }
             break
           case 'delete':
             this.props = {
               node: null,
               line: null,
-              multi: false,
-              nodes: null,
-              locked: false
+              nodes: null
             }
             break
           case 'dblclick':
-            // 自定义节点禁用
-            if (!data.data) return
-            console.log(data, data.constructor.name)
-            this.$emit('dbclick', {
-              line: data.constructor.name === 'Line' ? data : null,
-              node: data.constructor.name === 'Node' ? data : null
-            })
             break
           case 'line':
-            console.log(data)
-            data.locked = 1
+            this.props = {
+              node: null,
+              line: data,
+              nodes: null
+            }
             break
           case 'addLine':
             this.props = {
               node: null,
               line: data,
-              multi: false,
-              nodes: null,
-              locked: data.locked
+              nodes: null
             }
             break
           case 'multi':
-            console.log(event, data)
             this.props = {
-              node: data.length === 1 ? data[0] : null,
+              node: null,
               line: null,
-              multi: data.length > 1, // data.length > 1 ? true : false
-              nodes: data.length > 1 ? data : null,
-              locked: null
+              nodes: data
             }
             break
           case 'space':
             this.props = {
               node: null,
               line: null,
-              multi: false,
-              nodes: null,
-              locked: false
+              nodes: null
             }
             break
         }
       }, 0)
     },
+    // -----------------------------------------------------------------------------------------------------------------
+    // 右击事件
+    handleNode ({ state, node, line, nodes }) {
+      console.log(state, node, line, nodes)
+      this[`on${state}`]({node, line, nodes})
+    },
+    // 右击事件 - 撤销
+    onUndo ({ node, line, nodes }) {
+      this.canvas.undo()
+      this.canvas.render()
+    },
+    // 右击事件 - 重做
+    onRedo ({ node, line, nodes }) {
+      this.canvas.redo()
+      this.canvas.render()
+    },
+    // 右击事件 - 删除
+    onDelete ({ node, line, nodes }) {
+      this.canvas.delete()
+      this.canvas.render()
+    },
+    // 右击事件 - 置顶
+    onTop ({ node, line, nodes }) {
+      if (node) {
+        this.canvas.top(node)
+      }
+      if (line) {
+        this.canvas.top(line)
+      }
+      if (nodes && nodes.length) {
+        for (let item of nodes) {
+          this.canvas.top(item)
+        }
+      }
+      this.canvas.render()
+    },
+    // 右击事件 - 置底
+    onBottom ({ node, line, nodes }) {
+      if (node) {
+        this.canvas.bottom(node)
+      }
+      if (line) {
+        this.canvas.bottom(line)
+      }
+      if (nodes && nodes.length) {
+        for (let item of nodes) {
+          this.canvas.bottom(item)
+        }
+      }
+      this.canvas.render()
+    },
+    // 右击事件 - 上移一层
+    onUp ({ node, line, nodes }) {
+      if (node) {
+        this.canvas.up(node)
+      }
+      if (line) {
+        this.canvas.up(line)
+      }
+      if (nodes && nodes.length) {
+        for (let item of nodes) {
+          this.canvas.up(item)
+        }
+      }
+      this.canvas.render()
+    },
+    // 右击事件 - 下移一层
+    onDown ({ node, line, nodes }) {
+      if (node) {
+        this.canvas.down(node)
+      }
+      if (line) {
+        this.canvas.down(line)
+      }
+      if (nodes && nodes.length) {
+        for (let item of nodes) {
+          this.canvas.down(item)
+        }
+      }
+      this.canvas.render()
+    },
+    // 右击事件 - 复制
+    onCopy ({ node, line, nodes }) {
+      if (node) {
+        this.canvas.copy(node)
+      }
+      if (line) {
+        this.canvas.copy(line)
+      }
+      if (nodes && nodes.length) {
+        for (let item of nodes) {
+          this.canvas.copy(item)
+        }
+      }
+      this.canvas.render()
+    },
+    // 右击事件 - 粘贴
+    onPaste ({ node, line, nodes }) {
+      this.canvas.paste()
+      this.canvas.render()
+    },
+    // -----------------------------------------------------------------------------------------------------------------
+    // 修改属性
     onUpdateProps (node) {
       // 如果是node属性改变，需要传入node，重新计算node相关属性值
       // 如果是line属性改变，无需传参
       this.canvas.updateProps(node)
-    },
-    onChangeMenu ({ key, value }) {
-      this.$nextTick(() => {
-        console.log(key, value)
-        this.canvas.data[key] = value
-        this.menu_arr[key] = value
-        this.canvas.render()
-      })
-    },
-    // 初始化设备组件
-    initBaseTools: function () {
-      this.tools = Tools([])
-    },
-    /** 处理节点返回的所有事件 */
-    handleNode ({ state, node, nodes, line, multi }) {
-      console.log(state)
-      this[`on${state}`]({
-        node,
-        nodes,
-        line,
-        multi
-      })
-    },
-    onSaveCanvas () {
-      var vm = this
-      html2canvas(this.$refs.canvas).then((canvas) => {
-        vm.isLoading = true
-        var postForm = {
-          name: '1',
-          description: '1',
-          content: JSON.stringify(topology.data),
-          pic: canvas.toDataURL()
-        }
-        console.log(postForm)
-      })
-    },
-
-    onDelNode ({ node }) {
-      // 自定义节点 直接删除
-      if (!node.data) return this.canvas.delete()
-      // 实例节点 do...
-      this.$confirm('确认删除该组态节点？此操作无法恢复！', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => {
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          })
-          this.canvas.delete()
-        })
-        .catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消删除'
-          })
-        })
-    },
-    onTop ({ node, nodes }) {
-      if (nodes && nodes.length) {
-        for (const item of nodes) {
-          this.canvas.top(item)
-        }
-      }
-      if (node) {
-        this.canvas.top(node)
-      }
-      this.canvas.render()
-    },
-    onBottom ({ node, nodes }) {
-      if (nodes && nodes.length) {
-        for (const item of nodes) {
-          this.canvas.bottom(item)
-        }
-      }
-      if (node) {
-        this.canvas.bottom(node)
-      }
-      this.canvas.render()
     }
   }
 }
