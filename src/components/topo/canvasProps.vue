@@ -3,8 +3,8 @@
     <div class="canvas-props">
       <el-tabs type="border-card" v-model="tabName">
         <el-tab-pane label="外观" name="face">
-          <div class="canvas-props-list" v-show="tabName === 'face'">
-            <template v-if="!props.multi">
+          <div class="canvas-props-list">
+            <template v-if="props.node">
               <el-row :gutter="10">
                 <el-col :span="24">
                   <div class="canvas-props-title">位置和大小</div>
@@ -266,8 +266,8 @@
           </div>
         </el-tab-pane>
         <el-tab-pane label="自定义信息" name="custom" v-if="!props.multi && props.node && props.node.data">
-          <div class="canvas-props-list" v-if="!props.multi && props.node && props.node.data" v-show="tabName === 'custom'">
-            <template v-if="props.node.data">
+          <div class="canvas-props-list">
+            <template>
               <el-row :gutter="10">
                 <el-col :span="24">
                   <div class="canvas-props-label">代码</div>
@@ -304,7 +304,7 @@ export default {
     return {
       tabName: 'face',
       size: 'mini',
-      echartsProps: !this.props.multi && this.props.node.data.echarts ? JSON.stringify(this.props.node.data.echarts.option) : ''
+      echartsProps: !this.props.multi && this.props.node && this.props.node.data && this.props.node.data.echarts ? JSON.stringify(this.props.node.data.echarts.option) : ''
     }
   },
   created () {
@@ -335,7 +335,6 @@ export default {
     right: 0;
     bottom: 0;
     overflow: auto;
-
     .canvas-props {
       font-size: 12px;
       width: 300px;
@@ -345,12 +344,10 @@ export default {
       border-left: 1px solid #C0C4CC;
       overflow: auto;
       position: relative;
-
       .el-tabs--border-card {
         border: none;
         box-shadow: none;
       }
-
       .canvas-props-list {
         .canvas-props-title {
           font-weight: bold;
@@ -358,19 +355,15 @@ export default {
           margin-bottom: 5px;
           border-bottom: 1px solid #f1f1f1;
         }
-
         .canvas-props-label {
           padding: 5px 0;
         }
-
         .canvas-props-content {
           margin-bottom: 5px;
-
           > .el-input-number, > .el-color-picker, > .el-color-picker /deep/ .el-color-picker__trigger {
             width: 100%;
           }
         }
-
         .canvas-props-tips {
           color: #C0C4CC;
         }

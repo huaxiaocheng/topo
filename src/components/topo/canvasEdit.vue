@@ -80,7 +80,6 @@ export default {
     Menu,
     ContextMenu
   },
-  props: {},
   data () {
     return {
       tools: [],
@@ -444,10 +443,10 @@ export default {
     }
 
     .full {
-      /*width: 100%;*/
-      /*height: 100%;*/
-      width: 1200px;
-      height: 675px;
+      width: 100%;
+      height: 100%;
+      /*width: 1200px;*/
+      /*height: 675px;*/
       border: 2px solid #fafafa;
       margin: auto;
     }

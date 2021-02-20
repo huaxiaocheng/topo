@@ -3,7 +3,7 @@
     <div class="canvas-props">
       <el-tabs type="border-card" v-model="tabName">
         <el-tab-pane label="图文设置" name="overall">
-          <div class="canvas-props-list" v-show="tabName === 'overall'">
+          <div class="canvas-props-list">
             <el-row :gutter="10">
               <el-col :span="24">
                 <div class="canvas-props-title">图文</div>
@@ -197,7 +197,6 @@ export default {
     right: 0;
     bottom: 0;
     overflow: auto;
-
     .canvas-props {
       font-size: 12px;
       width: 300px;
@@ -207,12 +206,10 @@ export default {
       border-left: 1px solid #C0C4CC;
       overflow: auto;
       position: relative;
-
       .el-tabs--border-card {
         border: none;
         box-shadow: none;
       }
-
       .canvas-props-list {
         .canvas-props-title {
           font-weight: bold;
@@ -220,39 +217,31 @@ export default {
           margin-bottom: 5px;
           border-bottom: 1px solid #f1f1f1;
         }
-
         .canvas-props-label {
           padding: 5px 0;
         }
-
         .canvas-props-content {
           margin-bottom: 5px;
-
           > .el-input-number, > .el-color-picker, > .el-color-picker /deep/ .el-color-picker__trigger {
             width: 100%;
           }
         }
-
         .canvas-props-tips {
           color: #C0C4CC;
         }
       }
-
       .tips {
         position: absolute;
         bottom: 0;
         left: 0;
         right: 0;
-
         .tips-title {
           font-weight: bold;
           padding: 10px;
           border-bottom: 1px solid #C0C4CC;
         }
-
         .tips-list {
           padding: 10px;
-
           li {
             list-style: inside;
             padding: 5px 0;
@@ -262,7 +251,6 @@ export default {
       }
     }
   }
-
   .avatar-uploader /deep/ .el-upload {
     border: 1px dashed #d9d9d9;
     border-radius: 6px;
