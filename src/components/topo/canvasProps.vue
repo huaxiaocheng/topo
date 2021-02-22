@@ -120,25 +120,6 @@
 
               <el-row :gutter="10">
                 <el-col :span="12">
-                  <div class="canvas-props-label">线条宽度</div>
-                </el-col>
-                <el-col :span="12">
-                  <div class="canvas-props-label">线条颜色</div>
-                </el-col>
-                <el-col :span="12">
-                  <div class="canvas-props-content">
-                    <el-input-number :size="size" v-model="props.node.lineWidth" controls-position="right" @change="onChange" :min="1" :step="1"></el-input-number>
-                  </div>
-                </el-col>
-                <el-col :span="12">
-                  <div class="canvas-props-content">
-                    <el-color-picker :size="size" v-model="props.node.strokeStyle" @change="onChange" show-alpha></el-color-picker>
-                  </div>
-                </el-col>
-              </el-row>
-
-              <el-row :gutter="10">
-                <el-col :span="12">
                   <div class="canvas-props-label">线条样式</div>
                 </el-col>
                 <el-col :span="12">
@@ -155,6 +136,25 @@
                 <el-col :span="12">
                   <div class="canvas-props-content">
                     <el-color-picker :size="size" v-model="props.node.fillStyle" @change="onChange" show-alpha></el-color-picker>
+                  </div>
+                </el-col>
+              </el-row>
+
+              <el-row :gutter="10">
+                <el-col :span="12">
+                  <div class="canvas-props-label">线条宽度</div>
+                </el-col>
+                <el-col :span="12">
+                  <div class="canvas-props-label">线条颜色</div>
+                </el-col>
+                <el-col :span="12">
+                  <div class="canvas-props-content">
+                    <el-input-number :size="size" v-model="props.node.lineWidth" controls-position="right" @change="onChange" :min="1" :step="1"></el-input-number>
+                  </div>
+                </el-col>
+                <el-col :span="12">
+                  <div class="canvas-props-content">
+                    <el-color-picker :size="size" v-model="props.node.strokeStyle" @change="onChange" show-alpha></el-color-picker>
                   </div>
                 </el-col>
               </el-row>
@@ -231,25 +231,6 @@
               </el-row>
 
               <el-row :gutter="10">
-                <el-col :span="12">
-                  <div class="canvas-props-label">水平偏移（px）</div>
-                </el-col>
-                <el-col :span="12">
-                  <div class="canvas-props-label">垂直偏移（px）</div>
-                </el-col>
-                <el-col :span="12">
-                  <div class="canvas-props-content">
-
-                  </div>
-                </el-col>
-                <el-col :span="12">
-                  <div class="canvas-props-content">
-
-                  </div>
-                </el-col>
-              </el-row>
-
-              <el-row :gutter="10">
                 <el-col :span="24">
                   <div class="canvas-props-label">内容</div>
                 </el-col>
@@ -261,7 +242,218 @@
               </el-row>
 
             </template>
+            <template v-else-if="props.line">
+              <el-row :gutter="10">
+                <el-col :span="24">
+                  <div class="canvas-props-title">样式</div>
+                </el-col>
+              </el-row>
+
+              <el-row :gutter="10">
+                <el-col :span="12">
+                  <div class="canvas-props-label">线条样式</div>
+                </el-col>
+                <el-col :span="12">
+                  <div class="canvas-props-label">连线类型</div>
+                </el-col>
+                <el-col :span="12">
+                  <div class="canvas-props-content">
+                    <el-select v-model="props.line.dash" :size="size" @change="onChange">
+                      <el-option :value="0" label="实线"></el-option>
+                      <el-option :value="1" label="虚线"></el-option>
+                    </el-select>
+                  </div>
+                </el-col>
+                <el-col :span="12">
+                  <div class="canvas-props-content">
+                    <el-select v-model="props.line.name" :size="size" @change="onChangeName" ref="name" class="line-select" placeholder="">
+                      <el-option v-for="(item, index) in lineNames" :key="index" :value="item.value" :label="item.value">
+                        <i :class="`topology font28 icon-${item.value}`"></i>
+                      </el-option>
+                    </el-select>
+                  </div>
+                </el-col>
+              </el-row>
+
+              <el-row :gutter="10">
+                <el-col :span="12">
+                  <div class="canvas-props-label">线条宽度</div>
+                </el-col>
+                <el-col :span="12">
+                  <div class="canvas-props-label">线条颜色</div>
+                </el-col>
+                <el-col :span="12">
+                  <div class="canvas-props-content">
+                    <el-input-number :size="size" v-model="props.line.lineWidth" controls-position="right" @change="onChange" :min="1" :step="1"></el-input-number>
+                  </div>
+                </el-col>
+                <el-col :span="12">
+                  <div class="canvas-props-content">
+                    <el-color-picker :size="size" v-model="props.line.strokeStyle" @change="onChange" show-alpha></el-color-picker>
+                  </div>
+                </el-col>
+              </el-row>
+
+              <el-row :gutter="10">
+                <el-col :span="12">
+                  <div class="canvas-props-label">起点箭头</div>
+                </el-col>
+                <el-col :span="12">
+                  <div class="canvas-props-label">终点箭头</div>
+                </el-col>
+                <el-col :span="12">
+                  <div class="canvas-props-content">
+                    <el-select v-model="props.line.fromArrow" :size="size" @change="onChangeFromArrow" ref="fromArrow" class="line-select" placeholder="">
+                      <el-option v-for="(item, index) in arrowTypes" :key="index" :value="item.value" :label="item.value">
+                        <i :class="`topology font28 icon-from-${item.value}`"></i>
+                      </el-option>
+                    </el-select>
+                  </div>
+                </el-col>
+                <el-col :span="12">
+                  <div class="canvas-props-content">
+                    <el-select v-model="props.line.toArrow" :size="size" @change="onChangeToArrow" ref="toArrow" class="line-select" placeholder="">
+                      <el-option v-for="(item, index) in arrowTypes" :key="index" :value="item.value" :label="item.value">
+                        <i :class="`topology font28 icon-to-${item.value}`"></i>
+                      </el-option>
+                    </el-select>
+                  </div>
+                </el-col>
+              </el-row>
+
+              <el-row :gutter="10">
+                <el-col :span="12">
+                  <div class="canvas-props-label">起点箭头颜色</div>
+                </el-col>
+                <el-col :span="12">
+                  <div class="canvas-props-label">终点箭头颜色</div>
+                </el-col>
+                <el-col :span="12">
+                  <div class="canvas-props-content">
+                    <el-color-picker :size="size" v-model="props.line.fromArrowColor" @change="onChange" show-alpha></el-color-picker>
+                  </div>
+                </el-col>
+                <el-col :span="12">
+                  <div class="canvas-props-content">
+                    <el-color-picker :size="size" v-model="props.line.toArrowColor" @change="onChange" show-alpha></el-color-picker>
+                  </div>
+                </el-col>
+              </el-row>
+
+              <el-row :gutter="10">
+                <el-col :span="12">
+                  <div class="canvas-props-label">起点箭头大小</div>
+                </el-col>
+                <el-col :span="12">
+                  <div class="canvas-props-label">终点箭头大小</div>
+                </el-col>
+                <el-col :span="12">
+                  <div class="canvas-props-content">
+                    <el-input-number :size="size" v-model="props.line.fromArrowSize" controls-position="right" @change="onChange" :min="1"></el-input-number>
+                  </div>
+                </el-col>
+                <el-col :span="12">
+                  <div class="canvas-props-content">
+                    <el-input-number :size="size" v-model="props.line.toArrowSize" controls-position="right" @change="onChange" :min="1"></el-input-number>
+                  </div>
+                </el-col>
+              </el-row>
+
+              <el-row :gutter="10">
+                <el-col :span="24">
+                  <div class="canvas-props-title">文字</div>
+                </el-col>
+              </el-row>
+
+              <el-row :gutter="10">
+                <el-col :span="12">
+                  <div class="canvas-props-label">字体</div>
+                </el-col>
+                <el-col :span="12">
+                  <div class="canvas-props-label">大小</div>
+                </el-col>
+                <el-col :span="12">
+                  <div class="canvas-props-content">
+                    <el-input :size="size" v-model="props.line.font.fontFamily" controls-position="right" @change="onChange"></el-input>
+                  </div>
+                </el-col>
+                <el-col :span="12">
+                  <div class="canvas-props-content">
+                    <el-input-number :size="size" v-model="props.line.font.fontSize" controls-position="right" @change="onChange" :min="8"></el-input-number>
+                  </div>
+                </el-col>
+              </el-row>
+
+              <el-row :gutter="10">
+                <el-col :span="12">
+                  <div class="canvas-props-label">颜色</div>
+                </el-col>
+                <el-col :span="12">
+                  <div class="canvas-props-label">背景</div>
+                </el-col>
+                <el-col :span="12">
+                  <div class="canvas-props-content">
+                    <el-color-picker :size="size" v-model="props.line.font.color" @change="onChange" show-alpha></el-color-picker>
+                  </div>
+                </el-col>
+                <el-col :span="12">
+                  <div class="canvas-props-content">
+                    <el-color-picker :size="size" v-model="props.line.font.background" @change="onChange" show-alpha></el-color-picker>
+                  </div>
+                </el-col>
+              </el-row>
+
+              <el-row :gutter="10">
+                <el-col :span="24">
+                  <div class="canvas-props-label">内容</div>
+                </el-col>
+                <el-col :span="24">
+                  <div class="canvas-props-content">
+                    <el-input type="textarea" v-model="props.line.text" @blur="onChange" :autosize="{ minRows: 3}"></el-input>
+                  </div>
+                </el-col>
+              </el-row>
+            </template>
             <template v-else>
+              <el-row :gutter="10">
+                <el-col :span="24">
+                  <div class="canvas-props-title">对齐</div>
+                </el-col>
+              </el-row>
+
+              <el-row :gutter="10">
+                <el-col :span="4">
+                  <div class="canvas-props-label align-btn">
+                    <el-button :size="size" icon="topology icon-align-left" title="左对齐" @click="handleNodesAlign('left')"></el-button>
+                  </div>
+                </el-col>
+                <el-col :span="4">
+                  <div class="canvas-props-label align-btn">
+                    <el-button :size="size" icon="topology icon-align-right" title="右对齐" @click="handleNodesAlign('right')"></el-button>
+                  </div>
+                </el-col>
+                <el-col :span="4">
+                  <div class="canvas-props-label align-btn">
+                    <el-button :size="size" icon="topology icon-align-top" title="顶部对齐" @click="handleNodesAlign('top')"></el-button>
+                  </div>
+                </el-col>
+                <el-col :span="4">
+                  <div class="canvas-props-label align-btn">
+                    <el-button :size="size" icon="topology icon-align-bottom" title="底部对齐" @click="handleNodesAlign('bottom')"></el-button>
+                  </div>
+                </el-col>
+                <el-col :span="4">
+                  <div class="canvas-props-label align-btn">
+                    <el-button :size="size" icon="topology icon-align-center" title="垂直居中" @click="handleNodesAlign('center')"></el-button>
+                  </div>
+                </el-col>
+                <el-col :span="4">
+                  <div class="canvas-props-label align-btn">
+                    <el-button :size="size" icon="topology icon-align-middle" title="水平居中" @click="handleNodesAlign('middle')"></el-button>
+                  </div>
+                </el-col>
+              </el-row>
+
             </template>
           </div>
         </el-tab-pane>
@@ -288,6 +480,7 @@
 
 <script>
 import { echartsObjs } from '@topology/chart-diagram'
+import { alignNodes } from '@topology/layout'
 
 export default {
   props: {
@@ -304,16 +497,106 @@ export default {
     return {
       tabName: 'face',
       size: 'mini',
+      // 线集合
+      lineNames: Object.freeze([{
+        name: '曲线',
+        value: 'curve'
+      }, {
+        name: '直线',
+        value: 'line'
+      }, {
+        name: '线段',
+        value: 'polyline'
+      }
+      ]),
+      // 箭头集合
+      arrowTypes: Object.freeze([{
+        name: '',
+        value: ''
+      }, {
+        name: '',
+        value: 'triangleSolid'
+      }, {
+        name: '',
+        value: 'diamondSolid'
+      }, {
+        name: '',
+        value: 'diamond'
+      }, {
+        name: '',
+        value: 'circleSolid'
+      }, {
+        name: '',
+        value: 'circle'
+      }, {
+        name: '',
+        value: 'line'
+      }, {
+        name: '',
+        value: 'lineUp'
+      }, {
+        name: '',
+        value: 'lineDown'
+      }
+      ]),
       echartsProps: !this.props.multi && this.props.node && this.props.node.data && this.props.node.data.echarts ? JSON.stringify(this.props.node.data.echarts.option, null, 4) : ''
     }
   },
   created () {
   },
   mounted () {
+    if (this.props.line) {
+      this.onChangeName(this.props.line.name)
+      this.onChangeFromArrow(this.props.line.fromArrow)
+      this.onChangeToArrow(this.props.line.toArrow)
+    }
   },
   updated () {
+    if (this.props.line) {
+      this.onChangeName(this.props.line.name)
+      this.onChangeFromArrow(this.props.line.fromArrow)
+      this.onChangeToArrow(this.props.line.toArrow)
+    }
   },
   methods: {
+    onChangeName (val) {
+      this.onChangeSvg('name', val)
+    },
+    onChangeFromArrow (val) {
+      this.onChangeSvg('fromArrow', val)
+    },
+    onChangeToArrow (val) {
+      this.onChangeSvg('toArrow', val)
+    },
+    onChangeSvg (key, val) {
+      let iconName = ''
+      switch (key) {
+        case 'name':
+          iconName = '' + val
+          break
+        case 'fromArrow':
+          iconName = 'from-' + val
+          break
+        case 'toArrow':
+          iconName = 'to-' + val
+          break
+      }
+      this.props.line[key] = val
+      // 获取当前el-select标签第一层div
+      const dom = this.$refs[key].$el
+      // 创建需要添加到其中的标签 并填充内容
+      const svgDom = document.createElement('span')
+      svgDom.setAttribute('class', 'el-input__prefix')
+      svgDom.innerHTML = '<i class="topology icon-' + iconName + '"></i>'
+      // 将创建的标签添加到父节点(第二层div)
+      if (dom.children[0].querySelector('.el-input__prefix')) {
+        dom.children[0].querySelector('.el-input__prefix').innerHTML = '<i class="topology icon-' + iconName + '"></i>'
+      } else {
+        dom.children[0].appendChild(svgDom)
+      }
+      // 得到el-select中的input标签
+      this.onChange()
+    },
     changeTab (name) {
       this.tabName = name
     },
@@ -323,6 +606,10 @@ export default {
     chartsProps (id) {
       this.props.node.data.echarts.option = JSON.parse(this.echartsProps)
       echartsObjs[id].chart.setOption(JSON.parse(this.echartsProps), true)
+    },
+    handleNodesAlign (align) {
+      alignNodes(this.canvas.activeLayer.pens, this.canvas.activeLayer.rect, align)
+      this.canvas.updateProps()
     }
   }
 }
@@ -369,5 +656,26 @@ export default {
         }
       }
     }
+  }
+  .line-select {
+    /deep/ .el-input__inner {
+      color: transparent;
+    }
+    /deep/ .el-input__prefix {
+      width: calc(100% - 40px);
+      color: #606266;
+      i {
+        font-size: 28px;
+      }
+    }
+  }
+  .font28 {
+    font-size: 28px;
+  }
+  .align-btn {
+    text-align: center;
+  }
+  .align-btn .el-button {
+    padding: 7px;
   }
 </style>

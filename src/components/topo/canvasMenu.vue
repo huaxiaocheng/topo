@@ -207,6 +207,7 @@ export default {
 
             i.topology {
               color: #303133;
+              font-size: 28px;
             }
 
             .el-submenu__icon-arrow {
@@ -248,6 +249,7 @@ export default {
 
       i.topology {
         color: #303133;
+        font-size: 28px;
       }
     }
   }
