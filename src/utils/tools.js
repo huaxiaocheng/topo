@@ -207,7 +207,7 @@ const Basic = [
         icon: 'topo-icon-fsux_zhexiantu',
         id: 48,
         data: {
-          text: '折线图',
+          text: '',
           rect: {
             width: 300,
             height: 200
@@ -239,7 +239,7 @@ const Basic = [
         icon: 'topo-icon-fsux_tubiao_zhuzhuangtu',
         id: 49,
         data: {
-          text: '柱状图',
+          text: '',
           rect: {
             width: 300,
             height: 200
@@ -294,7 +294,7 @@ const Basic = [
         icon: 'topo-icon-fsux_tubiao_bingtu1',
         id: 50,
         data: {
-          text: '饼图',
+          text: '',
           rect: {
             width: 200,
             height: 200
@@ -361,7 +361,7 @@ const Basic = [
         icon: 'topo-icon-fsux_tubiao_yibiaopan',
         id: 51,
         data: {
-          text: '仪表盘',
+          text: '',
           rect: {
             width: 300,
             height: 300

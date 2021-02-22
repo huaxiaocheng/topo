@@ -174,12 +174,12 @@
                 </el-col>
                 <el-col :span="12">
                   <div class="canvas-props-content">
-                    <el-input :size="size" v-model="props.node.fontFamily" controls-position="right" @change="onChange"></el-input>
+                    <el-input :size="size" v-model="props.node.font.fontFamily" controls-position="right" @change="onChange"></el-input>
                   </div>
                 </el-col>
                 <el-col :span="12">
                   <div class="canvas-props-content">
-                    <el-input-number :size="size" v-model="props.node.fontSize" controls-position="right" @change="onChange" :min="8"></el-input-number>
+                    <el-input-number :size="size" v-model="props.node.font.fontSize" controls-position="right" @change="onChange" :min="8"></el-input-number>
                   </div>
                 </el-col>
               </el-row>
@@ -193,12 +193,12 @@
                 </el-col>
                 <el-col :span="12">
                   <div class="canvas-props-content">
-                    <el-color-picker :size="size" v-model="props.node.fontColor" @change="onChange" show-alpha></el-color-picker>
+                    <el-color-picker :size="size" v-model="props.node.font.color" @change="onChange" show-alpha></el-color-picker>
                   </div>
                 </el-col>
                 <el-col :span="12">
                   <div class="canvas-props-content">
-                    <el-color-picker :size="size" v-model="props.node.textBackground" @change="onChange" show-alpha></el-color-picker>
+                    <el-color-picker :size="size" v-model="props.node.font.background" @change="onChange" show-alpha></el-color-picker>
                   </div>
                 </el-col>
               </el-row>
@@ -212,7 +212,7 @@
                 </el-col>
                 <el-col :span="12">
                   <div class="canvas-props-content">
-                    <el-select v-model="props.node.textAlign" :size="size" @change="onChange">
+                    <el-select v-model="props.node.font.textAlign" :size="size" @change="onChange">
                       <el-option value="left" label="左对齐"></el-option>
                       <el-option value="center" label="居中"></el-option>
                       <el-option value="right" label="右对齐"></el-option>
@@ -221,7 +221,7 @@
                 </el-col>
                 <el-col :span="12">
                   <div class="canvas-props-content">
-                    <el-select v-model="props.node.textBaseline" :size="size" @change="onChange">
+                    <el-select v-model="props.node.font.textBaseline" :size="size" @change="onChange">
                       <el-option value="top" label="顶部对齐"></el-option>
                       <el-option value="middle" label="居中"></el-option>
                       <el-option value="bottom" label="底部对齐"></el-option>
