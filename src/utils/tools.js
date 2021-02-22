@@ -1,40 +1,3 @@
-// 定义点位显示位置对象
-// 0 上 1 下 2 左 3 右
-export const PositionRect = [
-  function (width, height) {
-    return {
-      x: 0,
-      y: -height,
-      width,
-      height
-    }
-  },
-  function (width, height) {
-    return {
-      x: 0,
-      y: '105%',
-      width,
-      height
-    }
-  },
-  function (width, height) {
-    return {
-      x: -width,
-      y: '25%',
-      width,
-      height
-    }
-  },
-  function (width, height) {
-    return {
-      x: '100%',
-      y: '25%',
-      width,
-      height
-    }
-  }
-]
-
 const Basic = [
   {
     id: 'basic',
@@ -42,7 +5,19 @@ const Basic = [
     showType: 'icon',
     children: [
       {
-        name: '圆角矩形',
+        name: '正方形',
+        icon: 'icon-rect',
+        data: {
+          text: '',
+          rect: {
+            width: 100,
+            height: 100
+          },
+          name: 'square'
+        }
+      },
+      {
+        name: '矩形',
         icon: 'icon-rectangle',
         data: {
           text: '',
@@ -54,7 +29,7 @@ const Basic = [
         }
       },
       {
-        name: '圆',
+        name: '圆形',
         icon: 'icon-circle',
         data: {
           text: '',
@@ -165,30 +140,6 @@ const Basic = [
         }
       },
       {
-        name: '直线',
-        icon: 'icon-line',
-        data: {
-          text: '',
-          rect: {
-            width: 100,
-            height: 100
-          },
-          name: 'line'
-        }
-      },
-      {
-        name: '云',
-        icon: 'icon-cloud',
-        data: {
-          text: '',
-          rect: {
-            width: 100,
-            height: 100
-          },
-          name: 'cloud'
-        }
-      },
-      {
         name: '消息框',
         icon: 'icon-msg',
         data: {
@@ -202,6 +153,18 @@ const Basic = [
           paddingTop: 10,
           paddingBottom: 10,
           name: 'message'
+        }
+      },
+      {
+        name: '云',
+        icon: 'icon-cloud',
+        data: {
+          text: '',
+          rect: {
+            width: 100,
+            height: 100
+          },
+          name: 'cloud'
         }
       },
       {
@@ -236,7 +199,7 @@ const Basic = [
   },
   {
     id: 'other',
-    name: '其他组件',
+    name: '图表',
     showType: 'icon-charts',
     children: [
       {
@@ -432,6 +395,55 @@ const Basic = [
     ]
   }
 ]
+
+const topoCates = [
+  '鼓风机',
+  '仪表'
+]
+
+topoCates.forEach(element => {
+  Basic.push({
+    id: 'other',
+    name: element,
+    showType: 'image',
+    children: []
+  })
+})
+
+const modulesFiles = require.context('../assets/css/topology-images', true)
+
+modulesFiles.keys().forEach(item => {
+  let picPath = item.slice(0, item.length - 3)
+  let picType = item.slice(item.length - 3, item.length)
+  if (picType === 'svg') {
+    let imgTool = require('../assets/css/topology-images' + item.slice(1, item.length))
+    let imgCanvas = null
+    if (modulesFiles.keys().find(it => it === picPath + 'gif') !== undefined) {
+      imgCanvas = require('../assets/css/topology-images' + item.replace('svg', 'gif').slice(1, item.length))
+    } else {
+      imgCanvas = require('../assets/css/topology-images' + item.slice(1, item.length))
+    }
+    Basic.forEach(basicItem => {
+      if (item.indexOf(basicItem.name) >= 0) {
+        basicItem.children.push({
+          id: item.slice(1, item.length),
+          name: '',
+          image: imgTool,
+          data: {
+            name: 'image',
+            text: '',
+            rect: {
+              width: 100,
+              height: 100
+            },
+            image: imgCanvas,
+            data: null
+          }
+        })
+      }
+    })
+  }
+})
 
 const Tools = (images) => {
   return [...Basic]

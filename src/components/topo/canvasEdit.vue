@@ -271,7 +271,7 @@ export default {
     // -----------------------------------------------------------------------------------------------------------------
     // 右击事件
     handleNode ({ state, node, line, nodes }) {
-      console.log(state, node, line, nodes)
+      // console.log(state, node, line, nodes)
       this[`on${state}`]({node, line, nodes})
     },
     // 右击事件 - 撤销
@@ -418,8 +418,8 @@ export default {
               display: inline-table;
               color: #303133;
               line-height: 1;
-              width: 33.3333%;
-              height: 50px;
+              width: 25%;
+              height: 40px;
               text-align: center;
               text-decoration: none !important;
               cursor: pointer;
@@ -430,12 +430,20 @@ export default {
               }
 
               .topology {
-                font-size: 32px;
+                font-size: 28px;
               }
 
               .topoIconfont {
-                font-size: 32px;
+                font-size: 28px;
               }
+
+              img {
+                display: table-cell;
+                vertical-align: middle;
+                margin: 5px;
+                width: calc(100% - 10px);
+                height: calc(100% - 10px);
+            }
             }
           }
         }
@@ -455,8 +463,8 @@ export default {
     }
 
     .full {
-      width: 100%;
-      height: 100%;
+      width: calc(100% - 4px);
+      height: calc(100% - 4px);
       /*width: 1200px;*/
       /*height: 675px;*/
       border: 2px solid #fafafa;
