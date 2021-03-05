@@ -68,6 +68,7 @@
 <!--        <el-button icon="el-icon-view">预览</el-button>-->
 <!--      </el-form-item>-->
       <el-form-item label="">
+        <el-button type="primary" icon="el-icon-view" @click="onViewCanvas()">预览</el-button>
         <el-button type="primary" icon="el-icon-circle-check" @click="onSaveCanvas()">保存</el-button>
       </el-form-item>
     </el-form>
@@ -144,6 +145,9 @@ export default {
     // 保存画布
     onSaveCanvas () {
       this.$emit('save-canvas')
+    },
+    onViewCanvas () {
+      this.$emit('view-canvas')
     },
     changeScale (value) {
       if (value === 1) {

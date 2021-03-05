@@ -230,7 +230,7 @@
                 </el-col>
               </el-row>
 
-              <el-row :gutter="10">
+              <el-row :gutter="10" v-if="!props.node.hideInput">
                 <el-col :span="24">
                   <div class="canvas-props-label">内容</div>
                 </el-col>
@@ -457,7 +457,7 @@
             </template>
           </div>
         </el-tab-pane>
-        <el-tab-pane label="自定义信息" name="custom" v-if="!props.multi && props.node && props.node.data">
+        <el-tab-pane label="自定义信息" name="custom" v-if="!props.multi && props.node && props.node.data && props.node.data.echarts">
           <div class="canvas-props-list">
             <template>
               <el-row :gutter="10">
@@ -473,6 +473,33 @@
             </template>
           </div>
         </el-tab-pane>
+        <el-tab-pane label="数据" name="data" v-if="!props.multi && props.node">
+          <el-row :gutter="10">
+            <el-col :span="12">
+              <div class="canvas-props-label">设备</div>
+            </el-col>
+            <el-col :span="12">
+              <div class="canvas-props-label">信息位置</div>
+            </el-col>
+            <el-col :span="12">
+              <div class="canvas-props-content">
+                <el-select v-model="currentDeviceId" :size="size" @change="changeDevice">
+                  <el-option v-for="(item, index) in deviceList" :key="index" :value="item.id" :label="item.name"></el-option>
+                </el-select>
+              </div>
+            </el-col>
+            <el-col :span="12">
+              <div class="canvas-props-content">
+                <el-select v-model="showPosition" :size="size" @change="onChangePosition">
+                  <el-option :value="0" label="上"></el-option>
+                  <el-option :value="1" label="下"></el-option>
+                  <el-option :value="2" label="左"></el-option>
+                  <el-option :value="3" label="右"></el-option>
+                </el-select>
+              </div>
+            </el-col>
+          </el-row>
+        </el-tab-pane>
       </el-tabs>
     </div>
   </div>
@@ -481,6 +508,9 @@
 <script>
 import { echartsObjs } from '@topology/chart-diagram'
 import { alignNodes } from '@topology/layout'
+import { Node } from '@topology/core' // todo：getRect
+import { PositionRect } from '../../utils/tools'
+import deviceService from '@/api/device/deviceService.js'
 
 export default {
   props: {
@@ -539,12 +569,28 @@ export default {
         value: 'lineDown'
       }
       ]),
-      echartsProps: !this.props.multi && this.props.node && this.props.node.data && this.props.node.data.echarts ? JSON.stringify(this.props.node.data.echarts.option, null, 4) : ''
+      echartsProps: !this.props.multi && this.props.node && this.props.node.data && this.props.node.data.echarts ? JSON.stringify(this.props.node.data.echarts.option, null, 4) : '',
+      deviceList: [],
+      currentDevice: {},
+      currentDeviceId: null,
+      showPosition: 1
     }
   },
   created () {
   },
   mounted () {
+    this.initDevice()
+    if (this.props.node) {
+      let data = this.props.node.data
+      if (data.device) {
+        this.currentDevice = JSON.parse(JSON.stringify(data.device))
+        this.currentDeviceId = this.currentDevice.id
+      }
+      if (data.showPosition === undefined) {
+        data.showPosition = 1
+      }
+      this.showPosition = data.showPosition
+    }
     if (this.props.line) {
       this.onChangeName(this.props.line.name)
       this.onChangeFromArrow(this.props.line.fromArrow)
@@ -610,6 +656,74 @@ export default {
     handleNodesAlign (align) {
       alignNodes(this.canvas.activeLayer.pens, this.canvas.activeLayer.rect, align)
       this.canvas.updateProps()
+    },
+    initDevice () {
+      deviceService.getDeviceAll().then((res) => {
+        if (res !== false) {
+          this.deviceList = res
+        }
+      }).finally({
+      })
+    },
+    changeDevice () {
+      this.currentDevice = this.deviceList.find(item => item.id === this.currentDeviceId)
+      this.props.node.data.device = this.currentDevice
+      this.updatePoint(this.props.node.id)
+    },
+    onChangePosition () {
+      this.props.node.data.showPosition = this.showPosition
+      if (this.props.node.data.device) {
+        this.updatePoint(this.props.node.id)
+      }
+    },
+    updatePoint (id) {
+      deviceService.getPointList(this.currentDevice.serialNo, this.currentDevice.productId).then((res) => {
+        if (res !== false) {
+          this.props.node.data.pointList = res
+          let pointList = JSON.parse(JSON.stringify(res))
+          this.canvas.data.pens.forEach(pen => {
+            if (pen.id === id) {
+              pen.children = null
+              let len = pointList.length
+              let str = ''
+              let width = Math.max(...pointList.map(item => item.displayName.length * 16 + 24))
+              let height = len * 20
+              if (len) {
+                /** 设置子节点 添加文本 */
+                pointList.forEach((item, index) => {
+                  if (index < len - 1) {
+                    str += (item.displayName + '：**数据**' + '\n')
+                  } else {
+                    str += (item.displayName + '：**数据**')
+                  }
+                })
+
+                let child = new Node({
+                  text: str,
+                  rect: {
+                    width: 200,
+                    height: 50
+                  },
+                  name: 'text',
+                  data: null
+                })
+                child.hideInput = true
+                child.hideRotateCP = true
+                child.hideSizeCP = true
+                child.hideAnchor = true
+                child.font.textAlign = 'left'
+                child.paddingLeft = 5
+                // 设置子节点相对父节点属性
+                child.rectInParent = PositionRect[this.showPosition](width, height)
+                pen.setChild([child])
+                this.props.node = pen
+              }
+            }
+          })
+          this.canvas.render()
+        }
+      }).finally({
+      })
     }
   }
 }

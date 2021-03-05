@@ -6,7 +6,8 @@
           :to="menu_arr.toArrow"
           :canvas="canvas"
           @on-change-menu="onChangeMenu"
-          @save-canvas="onSaveCanvas">
+          @save-canvas="onSaveCanvas"
+          @view-canvas="onViewCanvas">
     </Menu>
     <!-- 顶部菜单 -->
     <!-- 工具 -->
@@ -79,6 +80,9 @@ export default {
     // 画布属性
     Overall
   },
+  props: {
+    canvasString: String
+  },
   data () {
     return {
       // ---------------------------------------------------------------------------------------------------------------
@@ -141,6 +145,9 @@ export default {
     onSaveCanvas () {
       console.log(JSON.stringify(topology.data))
     },
+    onViewCanvas () {
+      this.$emit('change-mode', false, JSON.stringify(topology.data))
+    },
     // -----------------------------------------------------------------------------------------------------------------
     // 初始化工具
     initBaseTools: function () {
@@ -156,10 +163,17 @@ export default {
       let canvasOptions = {}
       canvasOptions.on = this.onMessage
       this.canvas = new Topology('topology-canvas', canvasOptions)
-      this.open({pens: [], grid: true, rule: true})
+      if (this.canvasString !== '') {
+        this.open(JSON.parse(this.canvasString))
+      } else {
+        this.open({pens: []})
+      }
     },
     // 打开画布
     open (canvas) {
+      canvas.grid = true
+      canvas.rule = true
+      canvas.locked = 0
       this.canvas.open(canvas)
       // 打开画布后初始化连线类型、起点箭头、终点箭头
       setTimeout(() => {

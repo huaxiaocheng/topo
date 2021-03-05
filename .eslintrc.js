@@ -9,7 +9,8 @@ module.exports = {
     browser: true,
   },
   globals: {
-    topology: true
+    topology: true,
+    globalData: true
   },
   extends: [
     // https://github.com/vuejs/eslint-plugin-vue#priority-a-essential-error-prevention

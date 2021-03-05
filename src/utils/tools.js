@@ -1,3 +1,39 @@
+// 0 上 1 下 2 左 3 右
+export const PositionRect = [
+  function (width, height) {
+    return {
+      x: 0,
+      y: -height,
+      width,
+      height
+    }
+  },
+  function (width, height) {
+    return {
+      x: 0,
+      y: '105%',
+      width,
+      height
+    }
+  },
+  function (width, height) {
+    return {
+      x: -width,
+      y: '-45%',
+      width,
+      height
+    }
+  },
+  function (width, height) {
+    return {
+      x: '105%',
+      y: '-45%',
+      width,
+      height
+    }
+  }
+]
+
 const Basic = [
   {
     id: 'basic',
@@ -13,7 +49,8 @@ const Basic = [
             width: 100,
             height: 100
           },
-          name: 'square'
+          name: 'square',
+          data: {}
         }
       },
       {
@@ -25,7 +62,8 @@ const Basic = [
             width: 200,
             height: 50
           },
-          name: 'rectangle'
+          name: 'rectangle',
+          data: {}
         }
       },
       {
@@ -38,7 +76,8 @@ const Basic = [
             height: 100
           },
           name: 'circle',
-          textMaxLine: 1
+          textMaxLine: 1,
+          data: {}
         }
       },
       {
@@ -50,7 +89,8 @@ const Basic = [
             width: 100,
             height: 100
           },
-          name: 'triangle'
+          name: 'triangle',
+          data: {}
         }
       },
       {
@@ -62,7 +102,8 @@ const Basic = [
             width: 100,
             height: 100
           },
-          name: 'diamond'
+          name: 'diamond',
+          data: {}
         }
       },
       {
@@ -74,7 +115,8 @@ const Basic = [
             width: 100,
             height: 100
           },
-          name: 'pentagon'
+          name: 'pentagon',
+          data: {}
         }
       },
       {
@@ -88,7 +130,8 @@ const Basic = [
           },
           paddingTop: 10,
           paddingBottom: 10,
-          name: 'hexagon'
+          name: 'hexagon',
+          data: {}
         }
       },
       {
@@ -100,7 +143,8 @@ const Basic = [
             width: 100,
             height: 100
           },
-          name: 'pentagram'
+          name: 'pentagram',
+          data: {}
         }
       },
       {
@@ -112,7 +156,8 @@ const Basic = [
             width: 200,
             height: 100
           },
-          name: 'leftArrow'
+          name: 'leftArrow',
+          data: {}
         }
       },
       {
@@ -124,7 +169,8 @@ const Basic = [
             width: 200,
             height: 100
           },
-          name: 'rightArrow'
+          name: 'rightArrow',
+          data: {}
         }
       },
       {
@@ -136,7 +182,8 @@ const Basic = [
             width: 200,
             height: 100
           },
-          name: 'twowayArrow'
+          name: 'twowayArrow',
+          data: {}
         }
       },
       {
@@ -152,7 +199,8 @@ const Basic = [
           paddingRight: 10,
           paddingTop: 10,
           paddingBottom: 10,
-          name: 'message'
+          name: 'message',
+          data: {}
         }
       },
       {
@@ -164,7 +212,8 @@ const Basic = [
             width: 100,
             height: 100
           },
-          name: 'cloud'
+          name: 'cloud',
+          data: {}
         }
       },
       {
@@ -180,7 +229,8 @@ const Basic = [
           paddingRight: 10,
           paddingTop: 10,
           paddingBottom: 10,
-          name: 'file'
+          name: 'file',
+          data: {}
         }
       },
       {
@@ -192,7 +242,8 @@ const Basic = [
             width: 160,
             height: 30
           },
-          name: 'text'
+          name: 'text',
+          data: {}
         }
       }
     ]
@@ -213,6 +264,7 @@ const Basic = [
             height: 200
           },
           name: 'echarts',
+          hideInput: true,
           data: {
             echarts: {
               option: {
@@ -245,6 +297,7 @@ const Basic = [
             height: 200
           },
           name: 'echarts',
+          hideInput: true,
           data: {
             echarts: {
               option: {
@@ -300,6 +353,7 @@ const Basic = [
             height: 200
           },
           name: 'echarts',
+          hideInput: true,
           data: {
             echarts: {
               option: {
@@ -367,6 +421,7 @@ const Basic = [
             height: 300
           },
           name: 'echarts',
+          hideInput: true,
           data: {
             echarts: {
               option: {
@@ -437,7 +492,8 @@ modulesFiles.keys().forEach(item => {
               height: 100
             },
             image: imgCanvas,
-            data: null
+            data: {},
+            hideInput: true
           }
         })
       }
