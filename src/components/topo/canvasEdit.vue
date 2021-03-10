@@ -35,7 +35,13 @@
       <!-- 工具 -->
       <!-- 画布 -->
       <div class="canvas-container">
-        <div ref="canvas" id="topology-canvas" class="full" @contextmenu="onContextMenu($event)"></div>
+        <div ref="canvas"
+             id="topology-canvas"
+             class="full"
+             @contextmenu="onContextMenu($event)"
+             :style="{
+               width: (canvas && canvas.options.width ? canvas.options.width : 1920) + 'px',
+               height: (canvas && canvas.options.height ? canvas.options.height : 1080) + 'px'}"></div>
       </div>
       <!-- 画布 -->
       <!-- 属性 -->
@@ -81,7 +87,8 @@ export default {
     Overall
   },
   props: {
-    canvasString: String
+    canvasData: String,
+    canvasOptions: String
   },
   data () {
     return {
@@ -146,7 +153,7 @@ export default {
       console.log(JSON.stringify(topology.data))
     },
     onViewCanvas () {
-      this.$emit('change-mode', false, JSON.stringify(topology.data))
+      this.$emit('change-mode', false, JSON.stringify(topology.data), JSON.stringify(this.canvas.options))
     },
     // -----------------------------------------------------------------------------------------------------------------
     // 初始化工具
@@ -161,10 +168,19 @@ export default {
     // 初始化画布
     initCanvas () {
       let canvasOptions = {}
+      if (this.canvasOptions !== '') {
+        canvasOptions = JSON.parse(this.canvasOptions)
+      } else {
+        canvasOptions = {
+          width: 1200,
+          height: 675,
+          disableScale: true
+        }
+      }
       canvasOptions.on = this.onMessage
       this.canvas = new Topology('topology-canvas', canvasOptions)
-      if (this.canvasString !== '') {
-        this.open(JSON.parse(this.canvasString))
+      if (this.canvasData !== '') {
+        this.open(JSON.parse(this.canvasData))
       } else {
         this.open({pens: []})
       }
@@ -471,17 +487,11 @@ export default {
       top: 20px;
       bottom: 20px;
       overflow: auto;
-      display: flex;
-      justify-items: center;
-      align-items: center;
     }
 
     .full {
-      width: calc(100% - 4px);
-      height: calc(100% - 4px);
-      /*width: 1200px;*/
-      /*height: 675px;*/
-      border: 2px solid #fafafa;
+      width: 100%;
+      height: 100%;
       margin: auto;
     }
 

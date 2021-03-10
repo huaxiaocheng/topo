@@ -1,17 +1,24 @@
 import request from '@/utils/request'
 
 export default {
-  // 所有设备
-  getDeviceAll () {
+  // 获取模型列表
+  getModelList () {
     return request({
-      url: '/api/device/device/all/data?clientId=18',
+      url: '/api/models',
       method: 'get'
     })
   },
-  // 点位
-  getPointList: function (sn, productId) {
+  // 获取模型列表
+  getModelById (id) {
     return request({
-      url: '/api/device/device/point/data?sn=' + sn + '&productId=' + productId,
+      url: '/api/model/' + id,
+      method: 'get'
+    })
+  },
+  // 获取设备列表
+  getDeviceList () {
+    return request({
+      url: '/api/devices',
       method: 'get'
     })
   }

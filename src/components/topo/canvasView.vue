@@ -1,7 +1,9 @@
 <template>
-  <div id="canvas-page-container">
+  <div class="canvas-outside">
     <el-button class="goBack" size="mini" type="primary" icon="el-icon-back" @click="goBack()">返回</el-button>
-    <div id="topology-canvas" class="full"></div>
+    <div id="canvas-page-container" :style="{width: (canvasOptions !== '' ? JSON.parse(canvasOptions).width : 1920) + 'px', height: (canvasOptions !== '' ? JSON.parse(canvasOptions).height : 1080) + 'px'}">
+      <div id="topology-canvas" class="full"></div>
+    </div>
   </div>
 </template>
 
@@ -10,7 +12,8 @@ import { Topology } from '@topology/core'
 
 export default {
   props: {
-    canvasString: String
+    canvasData: String,
+    canvasOptions: String
   },
   data () {
     return {
@@ -42,12 +45,15 @@ export default {
   },
   methods: {
     initCanvas () {
-      let canvasOptions = {}
+      let canvasOptions = JSON.parse(this.canvasOptions)
+      canvasOptions.disableScale = true
       canvasOptions.on = this.onMessage
       this.canvas = new Topology('topology-canvas', canvasOptions)
-      this.open(JSON.parse(this.canvasString))
+      this.open(JSON.parse(this.canvasData))
     },
     open (canvas) {
+      canvas.grid = false
+      canvas.rule = false
       canvas.locked = 2
       this.canvas.open(canvas)
       // 初始化
@@ -58,7 +64,7 @@ export default {
       })
     },
     goBack () {
-      this.$emit('change-mode', true, this.canvasString)
+      this.$emit('change-mode', true, this.canvasData, this.canvasOptions)
     },
     // 订阅
     subscribe () {
@@ -95,16 +101,23 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  #canvas-page-container {
+  .canvas-outside {
     position: relative;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     .goBack {
       position: absolute;
       right: 10px;
       top: 20px;
       z-index: 999;
     }
+  }
+  #canvas-page-container {
+    width: 100%;
+    height: 100%;
     .full {
       width: 100%;
       height: 100%;

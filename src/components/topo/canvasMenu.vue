@@ -156,7 +156,6 @@ export default {
         this.canvas.scaleTo(this.canvas.data.scale - 0.1)
       } else {
         this.canvas.scaleTo(1)
-        this.canvas.centerView()
       }
     }
   },

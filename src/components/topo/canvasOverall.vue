@@ -67,6 +67,25 @@
 
             <el-row :gutter="10">
               <el-col :span="12">
+                <div class="canvas-props-label">长度</div>
+              </el-col>
+              <el-col :span="12">
+                <div class="canvas-props-label">宽度</div>
+              </el-col>
+              <el-col :span="12">
+                <div class="canvas-props-content">
+                  <el-input-number :size="size" v-model="width" controls-position="right" @change="onchangeCanvas('options', 'width')" :min="800" :max="1920"></el-input-number>
+                </div>
+              </el-col>
+              <el-col :span="12">
+                <div class="canvas-props-content">
+                  <el-input-number :size="size" v-model="height" controls-position="right" @change="onchangeCanvas('options', 'height')" :min="450" :max="1080"></el-input-number>
+                </div>
+              </el-col>
+            </el-row>
+
+            <el-row :gutter="10">
+              <el-col :span="12">
                 <div class="canvas-props-label">网格</div>
               </el-col>
               <el-col :span="12">
@@ -74,12 +93,12 @@
               </el-col>
               <el-col :span="12">
                 <div class="canvas-props-content">
-                  <el-switch v-model="grid" @change="onchangeCanvas('grid')"></el-switch>
+                  <el-switch v-model="grid" @change="onchangeCanvas('data', 'grid')"></el-switch>
                 </div>
               </el-col>
               <el-col :span="12">
                 <div class="canvas-props-content">
-                  <el-color-picker :size="size" v-model="gridColor" @change="onchangeCanvas('gridColor')"></el-color-picker>
+                  <el-color-picker :size="size" v-model="gridColor" @change="onchangeCanvas('data', 'gridColor')"></el-color-picker>
                 </div>
               </el-col>
             </el-row>
@@ -93,12 +112,12 @@
               </el-col>
               <el-col :span="12">
                 <div class="canvas-props-content">
-                  <el-switch v-model="rule" @change="onchangeCanvas('rule')"></el-switch>
+                  <el-switch v-model="rule" @change="onchangeCanvas('data', 'rule')"></el-switch>
                 </div>
               </el-col>
               <el-col :span="12">
                 <div class="canvas-props-content">
-                  <el-color-picker :size="size" v-model="ruleColor" @change="onchangeCanvas('ruleColor')"></el-color-picker>
+                  <el-color-picker :size="size" v-model="ruleColor" @change="onchangeCanvas('data', 'ruleColor')"></el-color-picker>
                 </div>
               </el-col>
             </el-row>
@@ -137,7 +156,9 @@ export default {
       grid: this.canvas.data.grid,
       gridColor: this.canvas.data.gridColor,
       rule: this.canvas.data.rule,
-      ruleColor: this.canvas.data.ruleColor
+      ruleColor: this.canvas.data.ruleColor,
+      width: this.canvas.options.width,
+      height: this.canvas.options.height
     }
   },
   created () {
@@ -152,9 +173,13 @@ export default {
     changeTab (name) {
       this.tabName = name
     },
-    onchangeCanvas (key) {
-      this.canvas.data[key] = this[key]
-      this.canvas.render()
+    onchangeCanvas (option, key) {
+      this.canvas[option][key] = this[key]
+      if (option === 'options') {
+        this.canvas.resize()
+      } else {
+        this.canvas.render()
+      }
     },
     handleAddImg (file) {
       let raw = file.raw
@@ -231,6 +256,7 @@ export default {
         }
       }
       .tips {
+        background: #fafafa;
         position: absolute;
         bottom: 0;
         left: 0;
