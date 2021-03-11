@@ -20,16 +20,7 @@ axios.interceptors.request.use(
 // 响应拦截
 axios.interceptors.response.use(
   (response) => {
-    if (response.data.code === 0) {
-      return response.data.data
-    } else {
-      let msg = response.data.msg
-      Message({
-        message: msg,
-        type: 'error'
-      })
-      return false
-    }
+    return response.data
   },
   function (error) {
     if (axios.isCancel(error)) {

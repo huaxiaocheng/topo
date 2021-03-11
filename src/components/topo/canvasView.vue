@@ -64,35 +64,44 @@ export default {
       })
     },
     goBack () {
-      this.$emit('change-mode', true, this.canvasData, this.canvasOptions)
+      let data = JSON.parse(this.canvasData)
+      let pens = data.pens
+      for (let i = 0; i < pens.length; i++) {
+        if (pens[i].data.relations.deviceId !== undefined) {
+          delete pens[i].data.relations.deviceId
+        }
+      }
+      this.$emit('change-mode', true, JSON.stringify(data), this.canvasOptions)
     },
     // 订阅
     subscribe () {
+      let deviceList = []
       this.canvas.data.pens.forEach(pen => {
-        if (pen.data && pen.data.device) {
-          this.$store.state.ws.subscribe('/topic/property/18/' + pen.data.device.serialNo, msg => {
-            let message = JSON.parse(msg.body)
-            this.wsList.push(pen.data.device.serialNo)
-            this.handleData(pen, message)
-          }, {id: pen.data.device.serialNo})
+        if (pen.data && pen.data.relations.deviceId) {
+          deviceList.push(pen.data.relations.deviceId)
         }
       })
+      deviceList = [new Set(deviceList)]
+      deviceList.forEach(deivceId => {
+        this.$store.state.ws.subscribe('/channel/' + deivceId, msg => {
+          let message = JSON.parse(msg.body)
+          this.wsList.push(deivceId)
+          this.handleData(deivceId, message)
+        }, {id: deivceId})
+      })
     },
-    handleData (pen, message) {
-      if (pen.children) {
-        let str = ''
-        pen.data.pointList.forEach((item, index) => {
-          if (index < pen.data.pointList.length - 1) {
-            str += item.displayName + '：' + (message[item.identifier] ? message[item.identifier] : '') + (item.unit ? item.unit : '') + '\n'
-          } else {
-            str += item.displayName + '：' + (message[item.identifier] ? message[item.identifier] : '') + (item.unit ? item.unit : '')
-          }
-        })
-        pen.children[0].text = str
-        // 重新计算节点属性
-        this.canvas.updateProps('', [pen])
-        this.canvas.render()
+    handleData (device, message) {
+      let pens = this.canvas.data.pens.filter(item => item.data.relations.deviceId && item.data.relations.deviceId === device)
+      for (let i = 0; i < pens.length; i++) {
+        if (pens[i].data.relations.modelPropId[0] === 'tags') {
+          pens[i].text = message.tag[pens[i].data.relations.modelPropId[1]]
+        } else if (pens[i].data.relations.modelPropId[0] === 'reported') {
+          pens[i].text = message.properties.reported[pens[i].data.relations.modelPropId[1]]
+        }
       }
+      // 重新计算节点属性
+      this.canvas.updateProps('', [pens])
+      this.canvas.render()
     },
     onMessage (event, data) {
     }

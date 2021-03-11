@@ -30,7 +30,7 @@ export default {
     }
   },
   mounted () {
-    // websocket.wsConnection()
+    websocket.wsConnection()
   }
 }
 </script>

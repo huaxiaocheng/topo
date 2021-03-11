@@ -230,7 +230,7 @@
                 </el-col>
               </el-row>
 
-              <el-row :gutter="10" v-if="!props.node.hideInput">
+              <el-row :gutter="10" v-if="!(props.node.data.relations && props.node.data.relations.modelPropId && props.node.data.relations.modelPropId !== null && props.node.data.relations.modelPropId.length > 0)">
                 <el-col :span="24">
                   <div class="canvas-props-label">内容</div>
                 </el-col>
@@ -475,30 +475,71 @@
         </el-tab-pane>
         <el-tab-pane label="数据" name="data" v-if="!props.multi && props.node">
           <el-row :gutter="10">
+            <el-col :span="24">
+              <div class="canvas-props-label">ID: {{props.node.id}}</div>
+            </el-col>
+            <el-col :span="24">
+              <div class="canvas-props-content">&#12288;</div>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="10">
             <el-col :span="12">
-              <div class="canvas-props-label">设备</div>
+              <div class="canvas-props-label">父组件</div>
             </el-col>
             <el-col :span="12">
-              <div class="canvas-props-label">信息位置</div>
+              <div class="canvas-props-label">模型</div>
             </el-col>
             <el-col :span="12">
               <div class="canvas-props-content">
-                <el-select v-model="currentDeviceId" :size="size" @change="changeDevice">
-                  <el-option v-for="(item, index) in deviceList" :key="index" :value="item.id" :label="item.name"></el-option>
+                <el-select v-model="currentParentId" :size="size" @change="changeParent" clearable :disabled="pensList.find(item => item.data.relations && item.data.relations.parentId === props.node.id) !== undefined">
+                  <el-option
+                    v-for="(item, index) in pensList.filter(
+                      it => it.id !== props.node.id && (it.data.relations === undefined || (it.data.relations.parentId === undefined || it.data.relations.parentId === null || it.data.relations.parentId === '')))"
+                    :key="index"
+                    :value="item.id"
+                    :label="item.id">
+
+                  </el-option>
                 </el-select>
               </div>
             </el-col>
             <el-col :span="12">
               <div class="canvas-props-content">
-                <el-select v-model="showPosition" :size="size" @change="onChangePosition">
-                  <el-option :value="0" label="上"></el-option>
-                  <el-option :value="1" label="下"></el-option>
-                  <el-option :value="2" label="左"></el-option>
-                  <el-option :value="3" label="右"></el-option>
+                <el-select v-model="currentModelId" :size="size" @change="changeModel" clearable :disabled="(currentParentId !== null && currentParentId !== '') || pensList.find(item => item.data.relations && item.data.relations.parentId === props.node.id) !== undefined">
+                  <el-option v-for="(item, index) in modelList" :key="index" :value="item.guid" :label="item.tags ? item.tags.name : item.guid"></el-option>
                 </el-select>
               </div>
             </el-col>
           </el-row>
+
+          <el-row :gutter="10">
+            <el-col :span="24">
+              <div class="canvas-props-label">属性</div>
+            </el-col>
+            <el-col :span="24">
+              <div class="canvas-props-content">
+                <el-cascader v-model="currentModelPropId" :key="cascaderKey" :size="size" :options="modelPropsList" @change="changeModelProp" clearable style="width: 100%;"></el-cascader>
+              </div>
+            </el-col>
+          </el-row>
+<!--            <el-col :span="12">-->
+<!--              <div class="canvas-props-content">-->
+<!--                <el-select v-model="currentDeviceId" :size="size" @change="changeDevice">-->
+<!--                  <el-option v-for="(item, index) in deviceList" :key="index" :value="item.id" :label="item.name"></el-option>-->
+<!--                </el-select>-->
+<!--              </div>-->
+<!--            </el-col>-->
+<!--            <el-col :span="12">-->
+<!--              <div class="canvas-props-content">-->
+<!--                <el-select v-model="showPosition" :size="size" @change="onChangePosition">-->
+<!--                  <el-option :value="0" label="上"></el-option>-->
+<!--                  <el-option :value="1" label="下"></el-option>-->
+<!--                  <el-option :value="2" label="左"></el-option>-->
+<!--                  <el-option :value="3" label="右"></el-option>-->
+<!--                </el-select>-->
+<!--              </div>-->
+<!--            </el-col>-->
         </el-tab-pane>
       </el-tabs>
     </div>
@@ -508,8 +549,8 @@
 <script>
 import { echartsObjs } from '@topology/chart-diagram'
 import { alignNodes } from '@topology/layout'
-import { Node } from '@topology/core' // todo：getRect
-import { PositionRect } from '../../utils/tools'
+// import { Node } from '@topology/core' // todo：getRect
+// import { PositionRect } from '../../utils/tools'
 import deviceService from '@/api/device/deviceService.js'
 
 export default {
@@ -570,26 +611,49 @@ export default {
       }
       ]),
       echartsProps: !this.props.multi && this.props.node && this.props.node.data && this.props.node.data.echarts ? JSON.stringify(this.props.node.data.echarts.option, null, 4) : '',
-      deviceList: [],
-      currentDevice: {},
-      currentDeviceId: null,
-      showPosition: 1
+      // deviceList: [],
+      // currentDevice: {},
+      // currentDeviceId: null,
+      // showPosition: 1
+      cascaderKey: 1, // 用来解决 Error in callback for watcher "options": "TypeError: Cannot read property 'level' of null TypeError
+      pensList: topology.data.pens,
+      currentParentId: null,
+      modelList: [],
+      currentModelId: null,
+      modelPropsList: [],
+      currentModelPropId: []
     }
   },
   created () {
   },
   mounted () {
-    this.initDevice()
+    // this.initDevice()
+    this.initModel()
+
     if (this.props.node) {
       let data = this.props.node.data
-      if (data.device) {
-        this.currentDevice = JSON.parse(JSON.stringify(data.device))
-        this.currentDeviceId = this.currentDevice.id
+      if (data.relations) {
+        if (data.relations.parentId && data.relations.parentId !== null && data.relations.parentId !== '') {
+          this.currentParentId = data.relations.parentId
+          if (data.relations.modelId && data.relations.modelId !== null && data.relations.modelId !== '') {
+            this.currentModelId = data.relations.modelId
+            this.getModelProps(this.currentModelId)
+            if (data.relations.modelPropId && data.relations.modelPropId !== null && data.relations.modelPropId.length > 0) {
+              this.currentModelPropId = data.relations.modelPropId
+            }
+          }
+        } else {
+          if (data.relations.modelId && data.relations.modelId !== null && data.relations.modelId !== '') {
+            this.currentModelId = data.relations.modelId
+            this.getModelProps(this.currentModelId)
+            if (data.relations.modelPropId && data.relations.modelPropId !== null && data.relations.modelPropId.length > 0) {
+              this.currentModelPropId = data.relations.modelPropId
+            }
+          }
+        }
+      } else {
+        data.relations = {}
       }
-      if (data.showPosition === undefined) {
-        data.showPosition = 1
-      }
-      this.showPosition = data.showPosition
     }
     if (this.props.line) {
       this.onChangeName(this.props.line.name)
@@ -657,74 +721,137 @@ export default {
       alignNodes(this.canvas.activeLayer.pens, this.canvas.activeLayer.rect, align)
       this.canvas.updateProps()
     },
-    initDevice () {
-      deviceService.getDeviceAll().then((res) => {
-        if (res !== false) {
-          this.deviceList = res
-        }
-      }).finally({
+    initModel () {
+      deviceService.getModelList().then((res) => {
+        this.modelList = res
       })
     },
-    changeDevice () {
-      this.currentDevice = this.deviceList.find(item => item.id === this.currentDeviceId)
-      this.props.node.data.device = this.currentDevice
-      this.updatePoint(this.props.node.id)
-    },
-    onChangePosition () {
-      this.props.node.data.showPosition = this.showPosition
-      if (this.props.node.data.device) {
-        this.updatePoint(this.props.node.id)
+    // initDevice () {
+    //   deviceService.getDeviceList().then((res) => {
+    //     if (res !== false) {
+    //       this.deviceList = res
+    //     }
+    //   }).finally({
+    //   })
+    // },
+    changeModel () {
+      ++this.cascaderKey
+      this.currentModelPropId = []
+      this.props.node.data.relations.modelPropId = []
+      this.props.node.text = ''
+      this.modelPropsList = []
+      this.canvas.render()
+
+      this.props.node.data.relations.modelId = this.currentModelId
+      if (this.currentModelId !== null && this.currentModelId !== '') {
+        this.getModelProps(this.currentModelId)
       }
     },
-    updatePoint (id) {
-      deviceService.getPointList(this.currentDevice.serialNo, this.currentDevice.productId).then((res) => {
-        if (res !== false) {
-          this.props.node.data.pointList = res
-          let pointList = JSON.parse(JSON.stringify(res))
-          this.canvas.data.pens.forEach(pen => {
-            if (pen.id === id) {
-              pen.children = null
-              let len = pointList.length
-              let str = ''
-              let width = Math.max(...pointList.map(item => item.displayName.length * 16 + 24))
-              let height = len * 20
-              if (len) {
-                /** 设置子节点 添加文本 */
-                pointList.forEach((item, index) => {
-                  if (index < len - 1) {
-                    str += (item.displayName + '：**数据**' + '\n')
-                  } else {
-                    str += (item.displayName + '：**数据**')
-                  }
-                })
+    changeParent () {
+      ++this.cascaderKey
+      this.currentModelId = null
+      this.props.node.data.relations.modelId = null
+      this.currentModelPropId = []
+      this.props.node.data.relations.modelPropId = []
+      this.props.node.text = ''
+      this.modelPropsList = []
+      this.canvas.render()
 
-                let child = new Node({
-                  text: str,
-                  rect: {
-                    width: 200,
-                    height: 50
-                  },
-                  name: 'text',
-                  data: null
-                })
-                child.hideInput = true
-                child.hideRotateCP = true
-                child.hideSizeCP = true
-                child.hideAnchor = true
-                child.font.textAlign = 'left'
-                child.paddingLeft = 5
-                // 设置子节点相对父节点属性
-                child.rectInParent = PositionRect[this.showPosition](width, height)
-                pen.setChild([child])
-                this.props.node = pen
-              }
-            }
-          })
-          this.canvas.render()
+      this.props.node.data.relations.parentId = this.currentParentId
+      if (this.currentParentId !== null && this.currentParentId !== '') {
+        let parent = this.pensList.find(item => item.id === this.currentParentId)
+        if (parent.data.relations.modelId) {
+          this.currentModelId = parent.data.relations.modelId
+          this.props.node.data.relations.modelId = parent.data.relations.modelId
+          this.getModelProps(parent.data.relations.modelId)
         }
-      }).finally({
+      }
+    },
+    getModelProps (id) {
+      deviceService.getModelById(id).then((res) => {
+        this.props.node.data.model = res
+        this.modelPropsList = [
+          {
+            label: '固有属性',
+            value: 'tags',
+            children: Object.keys(res.tags).map(item => { return { label: item, value: item } })
+          }, {
+            label: '上报属性',
+            value: 'reported',
+            children: Object.keys(res.properties.reported).map(item => { return { label: item, value: item } })
+          }
+        ]
       })
+    },
+    changeModelProp () {
+      this.props.node.data.relations.modelPropId = this.currentModelPropId
+      if (this.currentModelPropId !== null && this.currentModelPropId.length > 0) {
+        this.props.node.text = (this.currentModelPropId[0] === 'tags' ? '固有属性 - ' : '上报属性 - ') + this.currentModelPropId[1]
+      } else {
+        this.props.node.text = ''
+      }
+      this.canvas.render()
     }
+    // changeDevice () {
+    //   this.currentDevice = this.deviceList.find(item => item.id === this.currentDeviceId)
+    //   this.props.node.data.device = this.currentDevice
+    //   this.updatePoint(this.props.node.id)
+    // },
+    // onChangePosition () {
+    //   this.props.node.data.showPosition = this.showPosition
+    //   if (this.props.node.data.device) {
+    //     this.updatePoint(this.props.node.id)
+    //   }
+    // },
+    // updatePoint (id) {
+    //   deviceService.getPointList(this.currentDevice.serialNo, this.currentDevice.productId).then((res) => {
+    //     if (res !== false) {
+    //       this.props.node.data.pointList = res
+    //       let pointList = JSON.parse(JSON.stringify(res))
+    //       this.canvas.data.pens.forEach(pen => {
+    //         if (pen.id === id) {
+    //           pen.children = null
+    //           let len = pointList.length
+    //           let str = ''
+    //           let width = Math.max(...pointList.map(item => item.displayName.length * 16 + 24))
+    //           let height = len * 20
+    //           if (len) {
+    //             /** 设置子节点 添加文本 */
+    //             pointList.forEach((item, index) => {
+    //               if (index < len - 1) {
+    //                 str += (item.displayName + '：**数据**' + '\n')
+    //               } else {
+    //                 str += (item.displayName + '：**数据**')
+    //               }
+    //             })
+    //
+    //             let child = new Node({
+    //               text: str,
+    //               rect: {
+    //                 width: 200,
+    //                 height: 50
+    //               },
+    //               name: 'text',
+    //               data: null
+    //             })
+    //             child.hideInput = true
+    //             child.hideRotateCP = true
+    //             child.hideSizeCP = true
+    //             child.hideAnchor = true
+    //             child.font.textAlign = 'left'
+    //             child.paddingLeft = 5
+    //             // 设置子节点相对父节点属性
+    //             child.rectInParent = PositionRect[this.showPosition](width, height)
+    //             pen.setChild([child])
+    //             this.props.node = pen
+    //           }
+    //         }
+    //       })
+    //       this.canvas.render()
+    //     }
+    //   }).finally({
+    //   })
+    // }
   }
 }
 </script>

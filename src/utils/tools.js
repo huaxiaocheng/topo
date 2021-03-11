@@ -50,6 +50,7 @@ const Basic = [
             height: 100
           },
           name: 'square',
+          hideInput: true,
           data: {}
         }
       },
@@ -63,6 +64,7 @@ const Basic = [
             height: 50
           },
           name: 'rectangle',
+          hideInput: true,
           data: {}
         }
       },
@@ -76,6 +78,7 @@ const Basic = [
             height: 100
           },
           name: 'circle',
+          hideInput: true,
           textMaxLine: 1,
           data: {}
         }
@@ -90,6 +93,7 @@ const Basic = [
             height: 100
           },
           name: 'triangle',
+          hideInput: true,
           data: {}
         }
       },
@@ -103,6 +107,7 @@ const Basic = [
             height: 100
           },
           name: 'diamond',
+          hideInput: true,
           data: {}
         }
       },
@@ -116,6 +121,7 @@ const Basic = [
             height: 100
           },
           name: 'pentagon',
+          hideInput: true,
           data: {}
         }
       },
@@ -131,6 +137,7 @@ const Basic = [
           paddingTop: 10,
           paddingBottom: 10,
           name: 'hexagon',
+          hideInput: true,
           data: {}
         }
       },
@@ -144,6 +151,7 @@ const Basic = [
             height: 100
           },
           name: 'pentagram',
+          hideInput: true,
           data: {}
         }
       },
@@ -157,6 +165,7 @@ const Basic = [
             height: 100
           },
           name: 'leftArrow',
+          hideInput: true,
           data: {}
         }
       },
@@ -170,6 +179,7 @@ const Basic = [
             height: 100
           },
           name: 'rightArrow',
+          hideInput: true,
           data: {}
         }
       },
@@ -183,6 +193,7 @@ const Basic = [
             height: 100
           },
           name: 'twowayArrow',
+          hideInput: true,
           data: {}
         }
       },
@@ -200,6 +211,7 @@ const Basic = [
           paddingTop: 10,
           paddingBottom: 10,
           name: 'message',
+          hideInput: true,
           data: {}
         }
       },
@@ -213,6 +225,7 @@ const Basic = [
             height: 100
           },
           name: 'cloud',
+          hideInput: true,
           data: {}
         }
       },
@@ -230,6 +243,7 @@ const Basic = [
           paddingTop: 10,
           paddingBottom: 10,
           name: 'file',
+          hideInput: true,
           data: {}
         }
       },
@@ -243,6 +257,7 @@ const Basic = [
             height: 30
           },
           name: 'text',
+          hideInput: true,
           data: {}
         }
       }

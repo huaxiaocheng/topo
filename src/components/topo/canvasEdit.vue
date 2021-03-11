@@ -38,10 +38,11 @@
         <div ref="canvas"
              id="topology-canvas"
              class="full"
-             @contextmenu="onContextMenu($event)"
-             :style="{
-               width: (canvas && canvas.options.width ? canvas.options.width : 1920) + 'px',
-               height: (canvas && canvas.options.height ? canvas.options.height : 1080) + 'px'}"></div>
+             @contextmenu="onContextMenu($event)"></div>
+<!-- 导致选框错位 -->
+<!--        :style="{-->
+<!--        width: (canvas && canvas.options.width ? canvas.options.width : 1920) + 'px',-->
+<!--        height: (canvas && canvas.options.height ? canvas.options.height : 1080) + 'px'}"-->
       </div>
       <!-- 画布 -->
       <!-- 属性 -->
@@ -58,11 +59,32 @@
       </div>
       <!-- 右键菜单 -->
     </div>
+    <!-- 弹窗 -->
+    <el-dialog title="绑定设备" :visible.sync="deviceFormVisible" width="600px" center>
+      <el-form ref="deviceForm" :model="deviceForm">
+        <template v-for="(item, index) in deviceForm.pensList">
+          <el-form-item :key="item.key" :prop="'pensList.' + index + '.data.relations.deviceId'">
+            <b>id：</b>{{item.id}}
+            &#12288;
+            <b>模型：</b>{{item.data.model.tags.name}}
+            &#12288;
+            <b>设备：</b>
+            <el-select v-model="item.data.relations.deviceId" size="mini">
+              <el-option v-for="(it, i) in deviceList" :key="i" :value="it.id" :label="it.id"></el-option>
+            </el-select>
+          </el-form-item>
+        </template>
+      </el-form>
+      <div slot="footer">
+        <el-button type="primary" @click="doView()" size="small">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 // utils
+import deviceService from '@/api/device/deviceService.js'
 import Tools from '../../utils/tools'
 // import html2canvas from 'html2canvas'
 import { Topology } from '@topology/core'
@@ -120,8 +142,27 @@ export default {
         node: null,
         line: null,
         nodes: null
-      }
+      },
       // ---------------------------------------------------------------------------------------------------------------
+      deviceFormVisible: false,
+      deviceForm: {
+        pensList: [
+          {
+            id: null,
+            data: {
+              model: {
+                tags: {
+                  name: null
+                }
+              },
+              relations: {
+                deviceId: null
+              }
+            }
+          }
+        ]
+      },
+      deviceList: []
     }
   },
   created () {
@@ -152,8 +193,34 @@ export default {
     onSaveCanvas () {
       console.log(JSON.stringify(topology.data))
     },
+    doView () {
+      let data = JSON.parse(JSON.stringify(topology.data))
+      let pens = data.pens
+      for (let i = 0; i < this.deviceForm.pensList.length; i++) {
+        if (this.deviceForm.pensList[i].data.relations.deviceId !== undefined) {
+          pens.find(item => item.id === this.deviceForm.pensList[i].id).data.relations.deviceId = this.deviceForm.pensList[i].data.relations.deviceId
+        }
+      }
+      for (let i = 0; i < pens.length; i++) {
+        if (pens[i].data.relations.deviceId === undefined && pens[i].data.relations.parentId !== undefined) {
+          pens[i].data.relations.deviceId = pens.find(item => item.id === pens[i].data.relations.parentId).data.relations.deviceId
+        }
+      }
+      this.$emit('change-mode', false, JSON.stringify(data), JSON.stringify(this.canvas.options))
+    },
     onViewCanvas () {
-      this.$emit('change-mode', false, JSON.stringify(topology.data), JSON.stringify(this.canvas.options))
+      deviceService.getDeviceList().then((res) => {
+        this.deviceFormVisible = true
+        this.$nextTick(() => {
+          this.$refs['deviceForm'].resetFields()
+          this.deviceList = res
+          let list = JSON.parse(JSON.stringify(topology.data.pens.filter(it => it.data.relations.modelId && (it.data.relations.parentId === undefined || it.data.relations.parentId === null || it.data.relations.parentId === ''))))
+          list.forEach(item => {
+            item.data.relations.deviceId = null
+          })
+          this.deviceForm.pensList = list
+        })
+      })
     },
     // -----------------------------------------------------------------------------------------------------------------
     // 初始化工具
