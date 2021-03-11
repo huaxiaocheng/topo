@@ -492,7 +492,7 @@
             </el-col>
             <el-col :span="12">
               <div class="canvas-props-content">
-                <el-select v-model="currentParentId" :size="size" @change="changeParent" clearable :disabled="pensList.find(item => item.data.relations && item.data.relations.parentId === props.node.id) !== undefined">
+                <el-select v-model="currentParentId" :size="size" @change="changeParent" filterable clearable :disabled="pensList.find(item => item.data.relations && item.data.relations.parentId === props.node.id) !== undefined">
                   <el-option
                     v-for="(item, index) in pensList.filter(
                       it => it.id !== props.node.id && (it.data.relations === undefined || (it.data.relations.parentId === undefined || it.data.relations.parentId === null || it.data.relations.parentId === '')))"
@@ -540,6 +540,69 @@
 <!--                </el-select>-->
 <!--              </div>-->
 <!--            </el-col>-->
+        </el-tab-pane>
+        <el-tab-pane label="事件" name="events" v-if="!props.multi && props.node">
+          <el-row :gutter="10">
+            <el-col :span="12">
+              <div class="canvas-props-label">事件类型</div>
+            </el-col>
+            <el-col :span="12">
+              <div class="canvas-props-label">事件行为</div>
+            </el-col>
+            <el-col :span="12">
+              <div class="canvas-props-content">
+                <el-select v-model="eventList.type" :size="size" clearable>
+                  <el-option v-for="(item, index) in eventTypeList" :key="index" :value="item.id" :label="item.name"></el-option>
+                </el-select>
+              </div>
+            </el-col>
+            <el-col :span="12">
+              <div class="canvas-props-content">
+                <el-select v-model="eventList.action" :size="size" clearable>
+                  <el-option v-for="(item, index) in eventActionList" :key="index" :value="item.id" :label="item.name"></el-option>
+                </el-select>
+              </div>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="10" v-show="eventList.action !== null && eventList.action !== ''">
+            <el-col :span="24">
+              <div class="canvas-props-label">{{eventList.action === 0 ? '链接地址' : '消息内容'}}</div>
+            </el-col>
+            <el-col :span="24">
+              <div class="canvas-props-content">
+                <el-input type="textarea" v-model="eventList.value" :autosize="{ minRows: 3}" :placeholder="eventList.action === 0 ? 'https://www.baidu.com' : '{version: 1}'"></el-input>
+              </div>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="10">
+            <el-col :span="24">
+              <div class="canvas-props-label">&#12288;</div>
+            </el-col>
+            <el-col :span="24">
+              <div class="canvas-props-content">
+                <el-button :size="size" type="primary" style="width: 100%;" @click="saveEvent()">确认</el-button>
+              </div>
+            </el-col>
+          </el-row>
+          <!--            <el-col :span="12">-->
+          <!--              <div class="canvas-props-content">-->
+          <!--                <el-select v-model="currentDeviceId" :size="size" @change="changeDevice">-->
+          <!--                  <el-option v-for="(item, index) in deviceList" :key="index" :value="item.id" :label="item.name"></el-option>-->
+          <!--                </el-select>-->
+          <!--              </div>-->
+          <!--            </el-col>-->
+          <!--            <el-col :span="12">-->
+          <!--              <div class="canvas-props-content">-->
+          <!--                <el-select v-model="showPosition" :size="size" @change="onChangePosition">-->
+          <!--                  <el-option :value="0" label="上"></el-option>-->
+          <!--                  <el-option :value="1" label="下"></el-option>-->
+          <!--                  <el-option :value="2" label="左"></el-option>-->
+          <!--                  <el-option :value="3" label="右"></el-option>-->
+          <!--                </el-select>-->
+          <!--              </div>-->
+          <!--            </el-col>-->
         </el-tab-pane>
       </el-tabs>
     </div>
@@ -611,23 +674,32 @@ export default {
       }
       ]),
       echartsProps: !this.props.multi && this.props.node && this.props.node.data && this.props.node.data.echarts ? JSON.stringify(this.props.node.data.echarts.option, null, 4) : '',
-      // deviceList: [],
-      // currentDevice: {},
-      // currentDeviceId: null,
-      // showPosition: 1
+      // 数据
       cascaderKey: 1, // 用来解决 Error in callback for watcher "options": "TypeError: Cannot read property 'level' of null TypeError
       pensList: topology.data.pens,
       currentParentId: null,
       modelList: [],
       currentModelId: null,
       modelPropsList: [],
-      currentModelPropId: []
+      currentModelPropId: [],
+      // 事件
+      eventList: {
+        type: null,
+        action: null,
+        value: null
+      },
+      eventTypeList: [
+        {id: 0, name: '单击'}
+      ],
+      eventActionList: [
+        {id: 0, name: '打开链接'},
+        {id: 100, name: '发送消息'}
+      ]
     }
   },
   created () {
   },
   mounted () {
-    // this.initDevice()
     this.initModel()
 
     if (this.props.node) {
@@ -653,6 +725,11 @@ export default {
         }
       } else {
         data.relations = {}
+      }
+
+      let events = this.props.node.events
+      if (events.length > 0) {
+        this.eventList = events[0]
       }
     }
     if (this.props.line) {
@@ -721,19 +798,12 @@ export default {
       alignNodes(this.canvas.activeLayer.pens, this.canvas.activeLayer.rect, align)
       this.canvas.updateProps()
     },
+    // 数据
     initModel () {
       deviceService.getModelList().then((res) => {
         this.modelList = res
       })
     },
-    // initDevice () {
-    //   deviceService.getDeviceList().then((res) => {
-    //     if (res !== false) {
-    //       this.deviceList = res
-    //     }
-    //   }).finally({
-    //   })
-    // },
     changeModel () {
       ++this.cascaderKey
       this.currentModelPropId = []
@@ -791,67 +861,34 @@ export default {
         this.props.node.text = ''
       }
       this.canvas.render()
+    },
+    // 事件
+    saveEvent () {
+      let msgContent = ''
+      let msgType = 'success'
+      if ((this.eventList.type === null || this.eventList.type === '') && (this.eventList.action === null || this.eventList.action === '')) {
+        msgContent = '删除事件成功'
+        this.eventList.value = null
+        this.props.node.events = []
+      } else if ((this.eventList.type !== null && this.eventList.type !== '') && (this.eventList.action !== null && this.eventList.action !== '') && (this.eventList.value !== null && this.eventList.value !== '')) {
+        msgContent = '添加事件成功'
+        this.props.node.events = [
+          {
+            type: this.eventList.type,
+            action: this.eventList.action,
+            value: this.eventList.value
+          }
+        ]
+      } else {
+        msgContent = '信息填写不完整'
+        msgType = 'warning'
+      }
+      this.$message({
+        message: msgContent,
+        type: msgType
+      })
+      this.canvas.render()
     }
-    // changeDevice () {
-    //   this.currentDevice = this.deviceList.find(item => item.id === this.currentDeviceId)
-    //   this.props.node.data.device = this.currentDevice
-    //   this.updatePoint(this.props.node.id)
-    // },
-    // onChangePosition () {
-    //   this.props.node.data.showPosition = this.showPosition
-    //   if (this.props.node.data.device) {
-    //     this.updatePoint(this.props.node.id)
-    //   }
-    // },
-    // updatePoint (id) {
-    //   deviceService.getPointList(this.currentDevice.serialNo, this.currentDevice.productId).then((res) => {
-    //     if (res !== false) {
-    //       this.props.node.data.pointList = res
-    //       let pointList = JSON.parse(JSON.stringify(res))
-    //       this.canvas.data.pens.forEach(pen => {
-    //         if (pen.id === id) {
-    //           pen.children = null
-    //           let len = pointList.length
-    //           let str = ''
-    //           let width = Math.max(...pointList.map(item => item.displayName.length * 16 + 24))
-    //           let height = len * 20
-    //           if (len) {
-    //             /** 设置子节点 添加文本 */
-    //             pointList.forEach((item, index) => {
-    //               if (index < len - 1) {
-    //                 str += (item.displayName + '：**数据**' + '\n')
-    //               } else {
-    //                 str += (item.displayName + '：**数据**')
-    //               }
-    //             })
-    //
-    //             let child = new Node({
-    //               text: str,
-    //               rect: {
-    //                 width: 200,
-    //                 height: 50
-    //               },
-    //               name: 'text',
-    //               data: null
-    //             })
-    //             child.hideInput = true
-    //             child.hideRotateCP = true
-    //             child.hideSizeCP = true
-    //             child.hideAnchor = true
-    //             child.font.textAlign = 'left'
-    //             child.paddingLeft = 5
-    //             // 设置子节点相对父节点属性
-    //             child.rectInParent = PositionRect[this.showPosition](width, height)
-    //             pen.setChild([child])
-    //             this.props.node = pen
-    //           }
-    //         }
-    //       })
-    //       this.canvas.render()
-    //     }
-    //   }).finally({
-    //   })
-    // }
   }
 }
 </script>

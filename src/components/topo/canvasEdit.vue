@@ -1,11 +1,12 @@
 <template>
-  <div id="canvas-page-container" class="not-select">
+  <div id="canvas-page-container">
     <!-- 顶部菜单 -->
     <Menu :line="menu_arr.lineName"
           :from="menu_arr.fromArrow"
           :to="menu_arr.toArrow"
           :canvas="canvas"
           @on-change-menu="onChangeMenu"
+          @import-canvas="onImportCanvas"
           @save-canvas="onSaveCanvas"
           @view-canvas="onViewCanvas">
     </Menu>
@@ -192,6 +193,16 @@ export default {
     // 保存
     onSaveCanvas () {
       console.log(JSON.stringify(topology.data))
+    },
+    onImportCanvas (data) {
+      if (this.canvas !== null) {
+        this.canvas.delete(topology.data.pens)
+        let pens = JSON.parse(data).pens
+        for (let i = 0; i < pens.length; i++) {
+          this.canvas.addNode(pens[i])
+        }
+        this.canvas.render()
+      }
     },
     doView () {
       let data = JSON.parse(JSON.stringify(topology.data))
@@ -518,12 +529,12 @@ export default {
               width: 25%;
               height: 40px;
               text-align: center;
+              vertical-align: middle;
               text-decoration: none !important;
               cursor: pointer;
 
               i {
                 display: table-cell;
-                vertical-align: middle;
               }
 
               .topology {
@@ -536,10 +547,9 @@ export default {
 
               img {
                 display: table-cell;
-                vertical-align: middle;
                 margin: 5px;
                 width: calc(100% - 10px);
-                height: calc(100% - 10px);
+                height: 30px;
             }
             }
           }

@@ -468,7 +468,9 @@ const Basic = [
 
 const topoCates = [
   '鼓风机',
-  '仪表'
+  '仪表',
+  '按钮',
+  '泵'
 ]
 
 topoCates.forEach(element => {

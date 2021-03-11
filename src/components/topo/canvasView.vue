@@ -104,6 +104,17 @@ export default {
       this.canvas.render()
     },
     onMessage (event, data) {
+      if (event === 'node') {
+        if (data.events.length > 0 && data.events[0].action === 100) {
+          let msg = {
+            id: data.data.relations.deviceId,
+            properties: {
+              desired: JSON.parse(data.events[0].value)
+            }
+          }
+          this.$store.state.ws.send('/channel/' + data.data.relations.deviceId, {}, JSON.stringify(msg))
+        }
+      }
     }
   }
 }

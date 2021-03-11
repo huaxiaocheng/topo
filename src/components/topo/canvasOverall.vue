@@ -19,7 +19,7 @@
               </el-col>
               <el-col :span="12">
                 <div class="canvas-props-content">
-                  <el-color-picker :size="size" v-model="bkColor" @change="onchangeCanvas('bkColor')"></el-color-picker>
+                  <el-color-picker :size="size" v-model="bkColor" @change="onchangeCanvas('data', 'bkColor')"></el-color-picker>
                 </div>
               </el-col>
               <el-col :span="12">
