@@ -109,10 +109,10 @@ export default {
           let msg = {
             id: data.data.relations.deviceId,
             properties: {
-              desired: data.events[0].value
+              desired: JSON.parse(data.events[0].value)
             }
           }
-          this.$store.state.ws.send('/channel/device/' + data.data.relations.deviceId, {}, JSON.stringify(msg))
+          this.$store.state.ws.send('/channel/device/send/' + data.data.relations.deviceId, {}, JSON.stringify(msg))
         }
       }
     }

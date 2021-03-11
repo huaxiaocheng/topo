@@ -571,7 +571,7 @@
             </el-col>
             <el-col :span="24">
               <div class="canvas-props-content">
-                <el-input type="textarea" v-model="eventList.value" :autosize="{ minRows: 3}" :placeholder="eventList.action === 0 ? 'https://www.baidu.com' : '{version: 1}'"></el-input>
+                <el-input type="textarea" v-model="eventList.value" :autosize="{ minRows: 3}" :placeholder="eventList.action === 0 ? '例：https://www.baidu.com' : '例：{&quot;version&quot;: 1}'"></el-input>
               </div>
             </el-col>
           </el-row>
