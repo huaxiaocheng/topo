@@ -81,20 +81,20 @@ export default {
           deviceList.push(pen.data.relations.deviceId)
         }
       })
-      deviceList = [new Set(deviceList)]
-      deviceList.forEach(deivceId => {
-        this.$store.state.ws.subscribe('/channel/' + deivceId, msg => {
+      deviceList = [...new Set(deviceList)]
+      deviceList.forEach(deviceId => {
+        this.wsList.push(deviceId)
+        this.$store.state.ws.subscribe('/channel/device/' + deviceId, msg => {
           let message = JSON.parse(msg.body)
-          this.wsList.push(deivceId)
-          this.handleData(deivceId, message)
-        }, {id: deivceId})
+          this.handleData(deviceId, message)
+        }, {id: deviceId})
       })
     },
     handleData (device, message) {
       let pens = this.canvas.data.pens.filter(item => item.data.relations.deviceId && item.data.relations.deviceId === device)
       for (let i = 0; i < pens.length; i++) {
         if (pens[i].data.relations.modelPropId[0] === 'tags') {
-          pens[i].text = message.tag[pens[i].data.relations.modelPropId[1]]
+          pens[i].text = message.tags[pens[i].data.relations.modelPropId[1]]
         } else if (pens[i].data.relations.modelPropId[0] === 'reported') {
           pens[i].text = message.properties.reported[pens[i].data.relations.modelPropId[1]]
         }
@@ -109,10 +109,10 @@ export default {
           let msg = {
             id: data.data.relations.deviceId,
             properties: {
-              desired: JSON.parse(data.events[0].value)
+              desired: data.events[0].value
             }
           }
-          this.$store.state.ws.send('/channel/' + data.data.relations.deviceId, {}, JSON.stringify(msg))
+          this.$store.state.ws.send('/channel/device/' + data.data.relations.deviceId, {}, JSON.stringify(msg))
         }
       }
     }
